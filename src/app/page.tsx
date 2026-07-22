@@ -216,9 +216,9 @@ export default function Home() {
           )}
         </div>
       </header>
+      <div className="h-[calc(100vh-57px)] flex overflow-hidden">
 
-      <div className="flex-1 flex overflow-hidden">
-        <aside className="w-96 bg-white border-r flex flex-col flex-shrink-0 overflow-y-auto">
+        <aside className="w-96 bg-white border-r flex flex-col flex-shrink-0 overflow-hidden">
           <div className="p-4 border-b"
             onDragOver={e => { e.preventDefault(); setDragging(true) }}
             onDragLeave={() => setDragging(false)}
@@ -287,8 +287,8 @@ export default function Home() {
               />
             </div>
 
-            {selectedCodes.length > 0 && <div className="px-4 py-3 border-b max-h-[40vh] overflow-y-auto">
-              <div className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2 sticky top-0 bg-white py-1">
+            {selectedCodes.length > 0 && <div className="px-4 py-3 overflow-y-auto sidebar-scroll flex-1">
+              <div className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
                 <span>Môn đã chọn ({selectedCodes.length})</span>
                 <span className="text-xs font-normal text-gray-400">
                   — {selectedCodes.reduce((sum, code) => sum + parseCredits(data?.courses.get(code)?.credits || ''), 0)} TC
@@ -414,7 +414,7 @@ export default function Home() {
           </>}
         </aside>
 
-        <main className="flex-1 flex flex-col overflow-hidden">
+        <main className="flex-1 flex flex-col overflow-hidden" style={{ height: 'calc(100vh - 57px)' }}>
           <div className="flex items-center justify-between px-6 py-3 bg-white border-b">
             <div className="flex items-center gap-2">
               {[
@@ -535,28 +535,30 @@ export default function Home() {
                   <tbody>
                     {PERIODS.map(p => (
                       <tr key={p} className={p === 7 ? 'afternoon-row' : ''}>
-                         <td className="text-xs text-gray-400 p-1 text-right pr-2 align-top">{p}<br />{PERIOD_TIME[p]}</td>
+                         <td className="text-xs text-gray-400 p-1 text-right pr-2 align-top w-16">{p}<br />{PERIOD_TIME[p]}</td>
                          {DAY_INDICES.map(d => {
                            const sessions = currentResult
                              ? currentResult.sessions.filter((s: ClassSession) => s.day === d && s.startPeriod <= p && s.endPeriod >= p)
                              : []
-                           if (sessions.length === 0) return <td key={d} className="border border-gray-50" />
+                           if (sessions.length === 0) return <td key={d} className="border border-gray-50 p-0" style={{ minHeight: 52 }} />
+                           const starts = sessions.filter((s: ClassSession) => s.startPeriod === p)
                            const unique = sessions.filter((s: ClassSession, i: number, arr: ClassSession[]) => i === arr.findIndex(x => x.maLop === s.maLop))
                            return (
-                             <td key={d} className="border p-1 align-top">
-                               {unique.map((s: ClassSession) => {
+                             <td key={d} className="border p-0.5 align-top" style={{ minHeight: 52 }}>
+                               <div className="flex gap-0.5" style={{ minHeight: 48 }}>
+                               {starts.length > 0 ? starts.map((s: ClassSession) => {
                                  const color = courseColors.get(s.courseCode) || '#888'
-                                 const isFirst = s.startPeriod === p
-                                 if (!isFirst) return null
                                  return (
-                                   <div key={s.maLop} className="text-xs leading-snug mb-0.5 rounded px-1 py-0.5" style={{ backgroundColor: color + '15', borderLeft: `3px solid ${color}` }}>
-                                     <div className="font-semibold" style={{ color }}>{s.courseCode}</div>
-                                     <div className="text-gray-600 text-[11px]">{s.maLop}</div>
-                                     <div className="text-gray-500 text-[11px]">{s.room}</div>
-                                     <div className="text-gray-700 text-[10px]">tuần {s.weeks}</div>
+                                   <div key={s.maLop} className="flex-1 text-[10px] leading-snug rounded px-1 py-0.5 flex flex-col justify-center"
+                                     style={{ backgroundColor: color + '18', borderTop: `2px solid ${color}` }}>
+                                     <div className="font-semibold text-xs" style={{ color }}>{s.courseCode}</div>
+                                     <div className="text-gray-600">{s.maLop}</div>
+                                     <div className="text-gray-500">{s.room}</div>
+                                     <div className="text-gray-700 font-medium">tuần {s.weeks}</div>
                                    </div>
                                  )
-                               })}
+                               }) : unique.length > 0 ? <div className="text-gray-300 text-[10px] p-1">tiếp</div> : null}
+                               </div>
                              </td>
                            )
                          })}
