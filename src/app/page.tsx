@@ -8,7 +8,7 @@ import * as XLSX from 'xlsx'
 import {
   Upload, Search, Plus, X, Calendar, SlidersHorizontal,
   ChevronLeft, ChevronRight, Save, Download, Sparkles, Flame,
-  CheckCircle2, Table2, ListOrdered, CircleHelp
+  CheckCircle2, Table2, ListOrdered, CircleHelp, Eye, EyeOff
 } from 'lucide-react'
 
 const DAY_OFF_LABELS: [string, boolean][] = [
@@ -56,6 +56,7 @@ export default function Home() {
   const [minimizeGaps, setMinimizeGaps] = useState(() => { try { const v = localStorage.getItem('tkb_minGaps'); return v ? JSON.parse(v) : true } catch { return true } })
   const [tooltip, setTooltip] = useState<string | null>(null)
   const [heatHover, setHeatHover] = useState<{ day: number; period: number } | null>(null)
+  const [hiddenCourses, setHiddenCourses] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     if (data) {
@@ -131,7 +132,7 @@ export default function Home() {
   const visibleSessions = (() => {
     if (!data) return []
     let s = selectedCodes.length > 0
-      ? data.sessions.filter(s => selectedCodes.includes(s.courseCode))
+      ? data.sessions.filter(s => selectedCodes.includes(s.courseCode) && !hiddenCourses.has(s.courseCode))
       : []
     if (programFilter !== 'all') s = s.filter(s => s.programType === programFilter)
     return s
@@ -281,6 +282,10 @@ export default function Home() {
                         <span className="font-medium text-sm">{code}</span>
                         <span className="text-gray-500 truncate flex-1 text-sm">{c?.name}</span>
                         <span className="text-gray-400 text-xs">{uniqueClasses.length} lớp</span>
+                        <button onClick={e => { e.stopPropagation(); setHiddenCourses(prev => { const n = new Set(prev); if (n.has(code)) n.delete(code); else n.add(code); return n }) }}
+                          className="text-gray-300 hover:text-gray-600 transition">
+                          {hiddenCourses.has(code) ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
                         <button onClick={e => { e.stopPropagation(); removeCourse(code) }}
                           className="text-red-300 hover:text-red-600"><X className="w-3.5 h-3.5" /></button>
                       </div>
@@ -341,12 +346,14 @@ export default function Home() {
                   className="accent-blue-600 w-4 h-4" />
                 <span>Ưu tiên ít cửa sổ trống</span>
                 <span className="relative inline-flex">
-                  <CircleHelp className="w-3.5 h-3.5 text-gray-400 cursor-help"
+                  <CircleHelp className="w-4 h-4 text-gray-400 cursor-help"
                     onMouseEnter={() => setTooltip('gap')}
                     onMouseLeave={() => setTooltip(null)}
                     onClick={() => setTooltip(tooltip === 'gap' ? null : 'gap')} />
-                  {tooltip === 'gap' && <span className="absolute z-20 bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-gray-800 text-white text-[10px] rounded shadow-lg w-48 text-center pointer-events-none">
-                    Cửa sổ trống = khoảng trống giữa 2 tiết học trong cùng ngày. VD: học tiết 1-2, trống tiết 3-4, học tiết 5-6 → có 2 cửa sổ trống.
+                  {tooltip === 'gap' && <span className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg w-64 text-left pointer-events-none leading-relaxed">
+                    <strong className="block mb-1">Cửa sổ trống là gì?</strong>
+                    Khoảng thời gian trống giữa 2 tiết học trong cùng một ngày.<br />
+                    <em className="text-gray-300">VD:</em> Học tiết 1-2, trống tiết 3-4, học tiết 5-6 → có 2 cửa sổ trống.
                   </span>}
                 </span>
               </label>
@@ -432,15 +439,17 @@ export default function Home() {
                               style={{ backgroundColor: getHeatColor(val, maxHeat) }}>
                               {val > 0 && <span className="font-medium">{val}</span>}
                               {isHover && unique.length > 0 && (
-                                <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-gray-900 text-white text-[10px] rounded shadow-lg whitespace-nowrap pointer-events-none">
-                                  <div className="font-semibold mb-0.5">{DAY_LABELS[d]} - Tiết {p} ({PERIOD_TIME[p]})</div>
-                                  {unique.slice(0, 8).map(code => (
-                                    <div key={code} className="flex items-center gap-1">
-                                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: courseColors.get(code) || '#888' }} />
-                                      {code}
+                                <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-xl whitespace-nowrap pointer-events-none">
+                                  <div className="font-semibold text-sm mb-1">{DAY_LABELS[d]} - Tiết {p} ({PERIOD_TIME[p]})</div>
+                                  <div className="space-y-0.5">
+                                  {unique.slice(0, 10).map(code => (
+                                    <div key={code} className="flex items-center gap-1.5">
+                                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: courseColors.get(code) || '#888' }} />
+                                      <span className="font-medium">{code}</span>
                                     </div>
                                   ))}
-                                  {unique.length > 8 && <div className="text-gray-400">+{unique.length - 8} môn khác</div>}
+                                  {unique.length > 10 && <div className="text-gray-400 mt-0.5">+{unique.length - 10} môn khác</div>}
+                                  </div>
                                 </div>
                               )}
                             </td>
