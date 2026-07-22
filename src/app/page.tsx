@@ -55,6 +55,7 @@ export default function Home() {
   const [minimizeDays, setMinimizeDays] = useState(() => { try { const v = localStorage.getItem('tkb_minDays'); return v ? JSON.parse(v) : true } catch { return true } })
   const [minimizeGaps, setMinimizeGaps] = useState(() => { try { const v = localStorage.getItem('tkb_minGaps'); return v ? JSON.parse(v) : true } catch { return true } })
   const [tooltip, setTooltip] = useState<string | null>(null)
+  const [heatHover, setHeatHover] = useState<{ day: number; period: number } | null>(null)
 
   useEffect(() => {
     if (data) {
@@ -420,9 +421,28 @@ export default function Home() {
                       <tr key={p} className={`hover:bg-gray-50 ${p === 7 ? 'afternoon-row' : ''}`}>                        <td className="text-xs text-gray-400 p-1 text-right pr-2 align-middle">{p}<br /><span className="text-gray-300">{PERIOD_TIME[p]}</span></td>
                         {DAY_INDICES.map(d => {
                           const val = heatmap[d]?.[p - 1] || 0
+                          const cellCourses = visibleSessions.filter(s => s.day === d && s.startPeriod <= p && s.endPeriod >= p)
+                          const unique = [...new Set(cellCourses.map(s => s.courseCode))]
+                          const isHover = heatHover?.day === d && heatHover?.period === p
                           return (
-                            <td key={d} className="border text-sm text-center p-1" style={{ backgroundColor: getHeatColor(val, maxHeat) }}>
+                            <td key={d}
+                              onMouseEnter={() => setHeatHover({ day: d, period: p })}
+                              onMouseLeave={() => setHeatHover(null)}
+                              className="border text-sm text-center p-1 relative cursor-default"
+                              style={{ backgroundColor: getHeatColor(val, maxHeat) }}>
                               {val > 0 && <span className="font-medium">{val}</span>}
+                              {isHover && unique.length > 0 && (
+                                <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-gray-900 text-white text-[10px] rounded shadow-lg whitespace-nowrap pointer-events-none">
+                                  <div className="font-semibold mb-0.5">{DAY_LABELS[d]} - Tiết {p} ({PERIOD_TIME[p]})</div>
+                                  {unique.slice(0, 8).map(code => (
+                                    <div key={code} className="flex items-center gap-1">
+                                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: courseColors.get(code) || '#888' }} />
+                                      {code}
+                                    </div>
+                                  ))}
+                                  {unique.length > 8 && <div className="text-gray-400">+{unique.length - 8} môn khác</div>}
+                                </div>
+                              )}
                             </td>
                           )
                         })}
