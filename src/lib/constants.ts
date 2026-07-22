@@ -14,7 +14,7 @@ export const COURSE_COLORS = [
   '#14b8a6', '#6366f1', '#d946ef', '#22c55e',
 ]
 
-export const PROGRAMS = ['CT CHUẨN', 'ELITECH', 'SIE'] as const
+export const PROGRAMS = ['CT CHUẨN', 'ELITECH', 'SIE', 'KSCSDT'] as const
 
 export function parseCredits(s: string): number {
   if (!s) return 0

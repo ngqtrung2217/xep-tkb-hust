@@ -242,6 +242,7 @@ export default function Home() {
                 <option value="CT CHUẨN">CT CHUẨN</option>
                 <option value="ELITECH">ELITECH</option>
                 <option value="SIE">SIE</option>
+                <option value="KSCSDT">KSCSDT</option>
               </select>
             </div>
 

@@ -5,7 +5,7 @@ const COL = {
   TEN_HP_EN: 6, KHOI_LUONG: 7, GHI_CHU: 8, BUOI_SO: 9,
   THU: 10, THOI_GIAN: 11, BD: 12, KT: 13, KIP: 14,
   TUAN: 15, PHONG: 16, SLDK: 18, SL_MAX: 19,
-  LOAI_LOP: 21, CHUONG_TRINH: 22,
+  LOAI_LOP: 21, CHUONG_TRINH: 23, MA_DOT: 22,
 }
 
 export function parseExcelData(data: any[][]): { courses: Map<string, Course>; sessions: ClassSession[] } {
