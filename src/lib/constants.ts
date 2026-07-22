@@ -21,3 +21,20 @@ export function parseCredits(s: string): number {
   const m = s.match(/^(\d+)/)
   return m ? parseInt(m[1]) : 0
 }
+
+export function parseWeeks(s: string): number[] {
+  if (!s) return []
+  const weeks = new Set<number>()
+  const parts = s.split(',')
+  for (const p of parts) {
+    const range = p.trim().split('-')
+    if (range.length === 2) {
+      const start = parseInt(range[0]), end = parseInt(range[1])
+      if (!isNaN(start) && !isNaN(end)) for (let w = start; w <= end; w++) weeks.add(w)
+    } else {
+      const w = parseInt(range[0])
+      if (!isNaN(w)) weeks.add(w)
+    }
+  }
+  return [...weeks].sort((a, b) => a - b)
+}

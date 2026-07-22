@@ -3,7 +3,7 @@ import { useRef, useState, useCallback, useEffect } from 'react'
 import { ClassSession, Course, UserPreferences, ScheduleResult } from '@/lib/types'
 import { parseExcelData } from '@/lib/parser'
 import { findAllSchedules, buildHeatmap } from '@/lib/scheduler'
-import { COURSE_COLORS, DAY_LABELS, DAY_INDICES, PERIODS, PERIOD_TIME, parseCredits } from '@/lib/constants'
+import { COURSE_COLORS, DAY_LABELS, DAY_INDICES, PERIODS, PERIOD_TIME, parseCredits, parseWeeks } from '@/lib/constants'
 import * as XLSX from 'xlsx'
 import {
   Upload, Search, Plus, X, Calendar, SlidersHorizontal,
@@ -57,6 +57,7 @@ export default function Home() {
   const [tooltip, setTooltip] = useState<string | null>(null)
   const [heatHover, setHeatHover] = useState<{ day: number; period: number } | null>(null)
   const [hiddenCourses, setHiddenCourses] = useState<Set<string>>(new Set())
+  const [selectedWeek, setSelectedWeek] = useState<number | null>(null)
 
   useEffect(() => {
     if (data) {
@@ -135,7 +136,18 @@ export default function Home() {
       ? data.sessions.filter(s => selectedCodes.includes(s.courseCode) && !hiddenCourses.has(s.courseCode))
       : []
     if (programFilter !== 'all') s = s.filter(s => s.programType === programFilter)
+    if (selectedWeek) s = s.filter(s => { const w = parseWeeks(s.weeks); return w.includes(selectedWeek) })
     return s
+  })()
+
+  const allWeeks = (() => {
+    if (!data) return []
+    const set = new Set<number>()
+    for (const s of data.sessions) {
+      if (!selectedCodes.includes(s.courseCode)) continue
+      parseWeeks(s.weeks).forEach(w => set.add(w))
+    }
+    return [...set].sort((a, b) => a - b)
   })()
 
   useEffect(() => {
@@ -331,6 +343,7 @@ export default function Home() {
                               <span className="font-medium">{s.maLop}</span>
                               <span className="text-gray-500">{DAY_LABELS[s.day]} {s.timeStr}</span>
                               {s.room && <span className="text-gray-400">- {s.room}</span>}
+                              <span className="text-gray-300 text-[10px]">{s.weeks}</span>
                             </div>
                           )
                         })}
@@ -407,6 +420,17 @@ export default function Home() {
                 </button>
               ))}
             </div>
+            {allWeeks.length > 0 && <div className="flex items-center gap-1 px-6 py-2 bg-white border-b overflow-x-auto">
+              <span className="text-xs text-gray-500 mr-1 whitespace-nowrap">Tuần:</span>
+              <button onClick={() => setSelectedWeek(null)}
+                className={`text-xs px-2 py-1 rounded whitespace-nowrap ${!selectedWeek ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-500 hover:bg-gray-100'}`}>Tất cả</button>
+              {allWeeks.map(w => (
+                <button key={w} onClick={() => setSelectedWeek(w)}
+                  className={`text-xs px-2 py-1 rounded whitespace-nowrap ${selectedWeek === w ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-500 hover:bg-gray-100'}`}>
+                  Tuần {w}
+                </button>
+              ))}
+            </div>}
             {scheduleResults && <div className="flex items-center gap-3">
               <span className="text-gray-500 text-sm">{scheduleResults.length} cách xếp</span>
               <button onClick={saveToLocal}
@@ -564,6 +588,7 @@ export default function Home() {
                         <span className="text-gray-500 w-28 font-mono text-xs">{s.maLop}</span>
                         <span className="text-gray-400">{DAY_LABELS[s.day]} {s.timeStr}</span>
                         <span className="text-gray-400 w-20 text-right">{s.room}</span>
+                        <span className="text-gray-300 text-[10px]">tuần {s.weeks}</span>
                       </div>
                     )
                   })}
