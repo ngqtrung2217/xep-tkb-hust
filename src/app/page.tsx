@@ -599,7 +599,7 @@ export default function Home() {
                         <span className="text-gray-700 truncate flex-1 min-w-0">{course?.name || s.courseName}</span>
                         <span className="text-gray-500 w-28 flex-shrink-0 text-right">{DAY_LABELS[s.day]} {s.timeStr}</span>
                         <span className="text-gray-500 w-20 flex-shrink-0 text-right">{s.room}</span>
-                        <span className="text-gray-700 font-medium w-24 flex-shrink-0 text-right">tuần {s.weeks}</span>
+                        <span className="text-gray-700 font-medium w-32 flex-shrink-0 text-right">tuần {s.weeks}</span>
                       </div>
                     )
                   })}
