@@ -479,6 +479,12 @@ export default function Home() {
                                       </div>
                                     )
                                   })}
+                                  <div className="text-gray-500 mt-1 pt-1 border-t border-gray-700 text-[10px]">
+                                    {unique.slice(0, 3).map(code => {
+                                      const w = cellCourses.find(s => s.courseCode === code)?.weeks
+                                      return w ? <div key={code}>Tuần {w}</div> : null
+                                    })}
+                                  </div>
                                   {unique.length > 10 && <div className="text-gray-400 mt-0.5">+{unique.length - 10} môn khác</div>}
                                   </div>
                                 </div>
@@ -526,6 +532,7 @@ export default function Home() {
                                 <div className="font-medium">{s.courseCode}</div>
                                 <div className="text-gray-500 text-[10px]">{s.maLop}</div>
                                 <div className="text-gray-400 text-[9px]">{s.room}</div>
+                                <div className="text-gray-300 text-[8px]">tuần {s.weeks}</div>
                               </div>}
                             </td>
                           )

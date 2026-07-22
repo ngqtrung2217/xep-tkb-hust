@@ -1,7 +1,15 @@
 import { ClassSession, UserPreferences, ScheduleResult } from './types'
+import { parseWeeks } from './constants'
+
+function weeksOverlap(a: string, b: string): boolean {
+  if (!a || !b) return true
+  const wa = parseWeeks(a), wb = parseWeeks(b)
+  return wa.some(w => wb.includes(w))
+}
 
 function sessionsOverlap(a: ClassSession, b: ClassSession): boolean {
   if (a.day !== b.day) return false
+  if (!weeksOverlap(a.weeks, b.weeks)) return false
   return a.startPeriod <= b.endPeriod && b.startPeriod <= a.endPeriod
 }
 
