@@ -258,6 +258,23 @@ export default function Home() {
                   </div>
                 )}
               </div>
+              <textarea
+                placeholder="Paste danh sách mã môn (dán từ file đk tín chỉ)..."
+                rows={2}
+                className="w-full border rounded-lg px-3 py-2 text-sm mt-2 resize-none"
+                onPaste={e => {
+                  const text = e.clipboardData.getData('text')
+                  const codes = text.split('\n').map(line => {
+                    const parts = line.trim().split('\t')
+                    const m = parts[0]?.trim().match(/^[A-Z]{2}\d{4}[A-Z]?/)
+                    return m ? m[0] : null
+                  }).filter(Boolean) as string[]
+                  if (codes.length > 0) {
+                    e.preventDefault()
+                    codes.forEach(code => { if (data?.courses.has(code)) addCourse(code) })
+                  }
+                }}
+              />
             </div>
 
             {selectedCodes.length > 0 && <div className="px-4 py-3 border-b flex-1 overflow-y-auto">
@@ -441,13 +458,18 @@ export default function Home() {
                               {isHover && unique.length > 0 && (
                                 <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-xl whitespace-nowrap pointer-events-none">
                                   <div className="font-semibold text-sm mb-1">{DAY_LABELS[d]} - Tiết {p} ({PERIOD_TIME[p]})</div>
+                                  <div className="text-gray-300 mb-1">Tổng số: <strong className="text-white">{val}</strong> lớp — <strong className="text-white">{unique.length}</strong> môn</div>
                                   <div className="space-y-0.5">
-                                  {unique.slice(0, 10).map(code => (
-                                    <div key={code} className="flex items-center gap-1.5">
-                                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: courseColors.get(code) || '#888' }} />
-                                      <span className="font-medium">{code}</span>
-                                    </div>
-                                  ))}
+                                  {unique.slice(0, 10).map(code => {
+                                    const count = cellCourses.filter(s => s.courseCode === code).length
+                                    return (
+                                      <div key={code} className="flex items-center gap-1.5">
+                                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: courseColors.get(code) || '#888' }} />
+                                        <span className="font-medium">{code}</span>
+                                        <span className="text-gray-400">({count} lớp)</span>
+                                      </div>
+                                    )
+                                  })}
                                   {unique.length > 10 && <div className="text-gray-400 mt-0.5">+{unique.length - 10} môn khác</div>}
                                   </div>
                                 </div>
