@@ -28,7 +28,7 @@ function scoreSchedule(
   }
 
   let score = 0
-  if (prefs.minimizeDays) score -= daysCount * 10
+  if (prefs.minimizeDays) score -= daysCount * 100
   if (prefs.minimizeGaps) score -= gaps * 5
 
   return { score, daysCount, gaps }
