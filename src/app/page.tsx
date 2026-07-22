@@ -145,7 +145,9 @@ export default function Home() {
 
   const runScheduler = () => {
     if (!data || selectedCodes.length === 0) return
-    const sessionsPerCourse = selectedCodes.map(code =>
+    const activeCodes = selectedCodes.filter(code => !hiddenCourses.has(code))
+    if (activeCodes.length === 0) return
+    const sessionsPerCourse = activeCodes.map(code =>
       data.sessions.filter(s => s.courseCode === code)
         .filter(s => programFilter === 'all' || s.programType === programFilter)
     )
@@ -271,7 +273,11 @@ export default function Home() {
                   }).filter(Boolean) as string[]
                   if (codes.length > 0) {
                     e.preventDefault()
-                    codes.forEach(code => { if (data?.courses.has(code)) addCourse(code) })
+                    const ok: string[] = [], fail: string[] = []
+                    codes.forEach(code => {
+                      if (!data?.courses.has(code)) fail.push(code)
+                      else if (!selectedCodes.includes(code)) { ok.push(code); addCourse(code) }
+                    })
                   }
                 }}
               />
