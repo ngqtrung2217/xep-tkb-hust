@@ -26,6 +26,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="vi">
       <head>
+        <link rel="llms" href="/llms.txt" />
+        <link rel="llms-full" href="/llms.txt" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             '@context': 'https://schema.org',

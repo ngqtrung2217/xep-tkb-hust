@@ -1,0 +1,27 @@
+# Xếp TKB HUST
+> Công cụ xếp thời khóa biểu tự động cho sinh viên Đại học Bách Khoa Hà Nội.
+
+## Giới thiệu
+- Upload file Excel thời khóa biểu từ HUST
+- Chọn môn học cần đăng ký
+- Xếp tự động: tìm tổ hợp không trùng lịch
+- Tuỳ chọn: ưu tiên ít ngày, ít cửa sổ trống, xếp chung giờ nếu khác tuần
+- Xem heatmap số lớp mở, timetable trực quan
+- Block từng lớp cụ thể, ẩn/hiện môn
+- Export file ICS (Google Calendar)
+
+## Cách dùng
+1. Upload file Excel (.xlsx) từ thông báo đăng ký tín chỉ HUST
+2. Chọn chương trình đào tạo (CT CHUẨN / ELITECH / SIE / KSCSDT)
+3. Nhập mã học phần hoặc paste danh sách từ clipboard
+4. Bấm "Xếp thời khóa biểu"
+5. Duyệt kết quả, chọn phương án phù hợp
+
+## Tính năng chính
+- Xếp tự động bằng Backtracking
+- Heatmap trực quan
+- Tuỳ chọn nghỉ buổi (sáng/chiều từng ngày)
+- Ưu tiên ít ngày học, ít cửa sổ trống
+- Xếp chung giờ nếu khác tuần (tuần lẻ/chẵn)
+- Chọn/block lớp cụ thể
+- Export ICS
