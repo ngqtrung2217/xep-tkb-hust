@@ -200,7 +200,7 @@ export default function Home() {
   const currentResult = scheduleResults?.[selectedResult]
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+      <div className="h-screen flex flex-col bg-gray-50">
       <header className="bg-white border-b px-6 py-4 flex items-center justify-between flex-shrink-0 shadow-sm">
         <h1 className="text-xl font-bold text-blue-600 flex items-center gap-2">
           <Calendar className="w-6 h-6" /> Xếp TKB HUST
@@ -455,8 +455,7 @@ export default function Home() {
                 <h3 className="text-base font-medium">Heatmap số lớp mở</h3>
               </div>
               <div className="overflow-auto border rounded-xl bg-white shadow-sm">
-                <table className="border-collapse w-full min-w-[700px] tkb-grid">                  <thead>
-                    <tr>
+                <table className="border-collapse w-full min-w-[700px] tkb-grid" style={{ tableLayout: 'fixed' }}>                  <thead>                    <tr>
                       <th className="w-20 p-2 text-xs text-gray-500 text-left font-medium">Tiết</th>
                       {DAY_LABELS.map((d, i) => (
                         <th key={i} className="text-sm p-2 text-center font-medium">
@@ -522,12 +521,12 @@ export default function Home() {
                 <h3 className="text-base font-medium">{currentResult ? 'Timetable kết quả' : 'Timetable - click môn để xem lớp'}</h3>
               </div>
               <div className="overflow-auto border rounded-xl bg-white shadow-sm">
-                <table className="border-collapse w-full min-w-[700px] tkb-grid">                  <thead>
-                    <tr>
-                      <th className="w-20 p-2 text-left text-gray-500 font-medium text-xs">Giờ</th>
-                      {DAY_LABELS.map((d, i) => (
-                        <th key={i} className="p-2 text-center font-medium text-sm">
-                          {d}<div className="text-xs text-gray-400 font-normal">{PERIOD_TIME[1]}-{PERIOD_TIME[12]}</div>
+                <table className="border-collapse w-full min-w-[700px] tkb-grid" style={{ tableLayout: 'fixed' }}>                  <thead>
+                     <tr>
+                       <th className="w-16 p-2 text-left text-gray-500 font-medium text-xs">Giờ</th>
+                       {DAY_LABELS.map((d, i) => (
+                         <th key={i} className="p-2 text-center font-medium text-sm">
+                           {d}<div className="text-xs text-gray-400 font-normal">{PERIOD_TIME[1]}-{PERIOD_TIME[12]}</div>
                         </th>
                       ))}
                     </tr>
