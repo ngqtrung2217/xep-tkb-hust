@@ -54,6 +54,7 @@ export default function Home() {
   const [dayOff, setDayOff] = useState<boolean[]>(() => loadJSON('tkb_dayoff', Array(14).fill(false)))
   const [minimizeDays, setMinimizeDays] = useState(() => { try { const v = localStorage.getItem('tkb_minDays'); return v ? JSON.parse(v) : true } catch { return true } })
   const [minimizeGaps, setMinimizeGaps] = useState(() => { try { const v = localStorage.getItem('tkb_minGaps'); return v ? JSON.parse(v) : true } catch { return true } })
+  const [weekAware, setWeekAware] = useState(() => { try { const v = localStorage.getItem('tkb_weekAware'); return v ? JSON.parse(v) : true } catch { return true } })
   const [tooltip, setTooltip] = useState<string | null>(null)
   const [heatHover, setHeatHover] = useState<{ day: number; period: number } | null>(null)
   const [hiddenCourses, setHiddenCourses] = useState<Set<string>>(new Set())
@@ -70,6 +71,7 @@ export default function Home() {
   useEffect(() => { try { localStorage.setItem('tkb_dayoff', JSON.stringify(dayOff)) } catch {} }, [dayOff])
   useEffect(() => { try { localStorage.setItem('tkb_minDays', JSON.stringify(minimizeDays)) } catch {} }, [minimizeDays])
   useEffect(() => { try { localStorage.setItem('tkb_minGaps', JSON.stringify(minimizeGaps)) } catch {} }, [minimizeGaps])
+  useEffect(() => { try { localStorage.setItem('tkb_weekAware', JSON.stringify(weekAware)) } catch {} }, [weekAware])
 
   useEffect(() => {
     if (data && selectedCodes.length > 0) {
@@ -152,7 +154,7 @@ export default function Home() {
         .filter(s => programFilter === 'all' || s.programType === programFilter)
     )
     if (sessionsPerCourse.some(s => s.length === 0)) return
-    const prefs: UserPreferences = { dayOff, minimizeDays, minimizeGaps, preferredSlots: [...brushSelect] }
+    const prefs: UserPreferences = { dayOff, minimizeDays, minimizeGaps, preferredSlots: [...brushSelect], weekAware }
     const results = findAllSchedules(sessionsPerCourse, prefs, excludedSessions)
     setScheduleResults(results); setSelectedResult(0)
   }
@@ -368,20 +370,35 @@ export default function Home() {
                 <span>Ưu tiên xếp ít ngày nhất</span>
               </label>
               <label className="flex items-center gap-2 text-sm cursor-pointer mb-2">
-                <input type="checkbox" checked={minimizeGaps} onChange={e => setMinimizeGaps(e.target.checked)}
-                  className="accent-blue-600 w-4 h-4" />
-                <span>Ưu tiên ít cửa sổ trống</span>
-                <span className="relative inline-flex">
-                  <CircleHelp className="w-4 h-4 text-gray-400 cursor-help"
-                    onMouseEnter={() => setTooltip('gap')}
-                    onMouseLeave={() => setTooltip(null)}
-                    onClick={() => setTooltip(tooltip === 'gap' ? null : 'gap')} />
-                  {tooltip === 'gap' && <span className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg w-64 text-left pointer-events-none leading-relaxed">
-                    <strong className="block mb-1">Cửa sổ trống là gì?</strong>
-                    Khoảng thời gian trống giữa 2 tiết học trong cùng một ngày.<br />
-                    <em className="text-gray-300">VD:</em> Học tiết 1-2, trống tiết 3-4, học tiết 5-6 → có 2 cửa sổ trống.
-                  </span>}
-                </span>
+              <input type="checkbox" checked={minimizeGaps} onChange={e => setMinimizeGaps(e.target.checked)}
+                className="accent-blue-600 w-4 h-4" />
+              <span>Ưu tiên ít cửa sổ trống</span>
+              <span className="relative inline-flex">
+                <CircleHelp className="w-4 h-4 text-gray-400 cursor-help"
+                  onMouseEnter={() => setTooltip('gap')}
+                  onMouseLeave={() => setTooltip(null)}
+                  onClick={() => setTooltip(tooltip === 'gap' ? null : 'gap')} />
+                {tooltip === 'gap' && <span className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg w-64 text-left pointer-events-none leading-relaxed">
+                  <strong className="block mb-1">Cửa sổ trống là gì?</strong>
+                  Khoảng thời gian trống giữa 2 tiết học trong cùng một ngày.<br />
+                  <em className="text-gray-300">VD:</em> Học tiết 1-2, trống tiết 3-4, học tiết 5-6 → có 2 cửa sổ trống.
+                </span>}
+              </span>
+            </label>
+            <label className="flex items-center gap-2 text-sm cursor-pointer mb-2">
+              <input type="checkbox" checked={weekAware} onChange={e => setWeekAware(e.target.checked)}
+                className="accent-blue-600 w-4 h-4" />
+              <span>Xếp chung giờ nếu khác tuần</span>
+              <span className="relative inline-flex">
+                <CircleHelp className="w-4 h-4 text-gray-400 cursor-help"
+                  onMouseEnter={() => setTooltip('week')}
+                  onMouseLeave={() => setTooltip(null)}
+                  onClick={() => setTooltip(tooltip === 'week' ? null : 'week')} />
+                {tooltip === 'week' && <span className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg w-64 text-left pointer-events-none leading-relaxed">
+                  Cho phép xếp 2 lớp vào cùng giờ nếu khác tuần.<br />
+                  <em className="text-gray-300">VD:</em> Môn A tuần lẻ, môn B tuần chẵn → cùng tiết 3 Thứ 4.
+                </span>}
+              </span>
               </label>
               <div className="text-xs text-gray-400 mt-1">
                 {brushSelect.size > 0 && <span className="text-blue-500">✓ Đã chọn {brushSelect.size} khung giờ yêu thích trên heatmap</span>}
@@ -517,26 +534,32 @@ export default function Home() {
                   </thead>
                   <tbody>
                     {PERIODS.map(p => (
-                       <tr key={p} className={p === 7 ? 'afternoon-row' : ''}>
-                        <td className="text-xs text-gray-400 p-1 text-right pr-2">{p}<br />{PERIOD_TIME[p]}</td>
-                        {DAY_INDICES.map(d => {
-                          const s = currentResult
-                            ? currentResult.sessions.find((s: ClassSession) => s.day === d && s.startPeriod <= p && s.endPeriod >= p)
-                            : null
-                          if (!s) return <td key={d} className="border border-gray-50" />
-                          const color = courseColors.get(s.courseCode) || '#888'
-                          const isFirst = s.startPeriod === p
-                          return (
-                            <td key={d} className="border p-1 text-center" style={{ backgroundColor: isFirst ? color + '20' : color + '08' }}>
-                              {isFirst && <div className="text-xs leading-tight" style={{ color }}>
-                                <div className="font-medium">{s.courseCode}</div>
-                                <div className="text-gray-500 text-[10px]">{s.maLop}</div>
-                                <div className="text-gray-400 text-[9px]">{s.room}</div>
-                                <div className="text-gray-300 text-[8px]">tuần {s.weeks}</div>
-                              </div>}
-                            </td>
-                          )
-                        })}
+                      <tr key={p} className={p === 7 ? 'afternoon-row' : ''}>
+                         <td className="text-xs text-gray-400 p-1 text-right pr-2 align-top">{p}<br />{PERIOD_TIME[p]}</td>
+                         {DAY_INDICES.map(d => {
+                           const sessions = currentResult
+                             ? currentResult.sessions.filter((s: ClassSession) => s.day === d && s.startPeriod <= p && s.endPeriod >= p)
+                             : []
+                           if (sessions.length === 0) return <td key={d} className="border border-gray-50" />
+                           const unique = sessions.filter((s: ClassSession, i: number, arr: ClassSession[]) => i === arr.findIndex(x => x.maLop === s.maLop))
+                           return (
+                             <td key={d} className="border p-1 align-top">
+                               {unique.map((s: ClassSession) => {
+                                 const color = courseColors.get(s.courseCode) || '#888'
+                                 const isFirst = s.startPeriod === p
+                                 if (!isFirst) return null
+                                 return (
+                                   <div key={s.maLop} className="text-xs leading-snug mb-0.5 rounded px-1 py-0.5" style={{ backgroundColor: color + '15', borderLeft: `3px solid ${color}` }}>
+                                     <div className="font-semibold" style={{ color }}>{s.courseCode}</div>
+                                     <div className="text-gray-600 text-[11px]">{s.maLop}</div>
+                                     <div className="text-gray-500 text-[11px]">{s.room}</div>
+                                     <div className="text-gray-700 text-[10px]">tuần {s.weeks}</div>
+                                   </div>
+                                 )
+                               })}
+                             </td>
+                           )
+                         })}
                       </tr>
                     ))}
                   </tbody>

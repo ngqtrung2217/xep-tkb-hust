@@ -7,9 +7,9 @@ function weeksOverlap(a: string, b: string): boolean {
   return wa.some(w => wb.includes(w))
 }
 
-function sessionsOverlap(a: ClassSession, b: ClassSession): boolean {
+function sessionsOverlap(a: ClassSession, b: ClassSession, weekAware: boolean): boolean {
   if (a.day !== b.day) return false
-  if (!weeksOverlap(a.weeks, b.weeks)) return false
+  if (weekAware && !weeksOverlap(a.weeks, b.weeks)) return false
   return a.startPeriod <= b.endPeriod && b.startPeriod <= a.endPeriod
 }
 
@@ -88,7 +88,7 @@ export function findAllSchedules(
 
       let conflict = false
       for (const existing of current) {
-        if (sessionsOverlap(session, existing)) { conflict = true; break }
+        if (sessionsOverlap(session, existing, prefs.weekAware)) { conflict = true; break }
       }
       if (!conflict) {
         current.push(session)
