@@ -52,6 +52,7 @@ export default function Home() {
   const [saving, setSaving] = useState<string | null>(null)
   const [parseError, setParseError] = useState<string | null>(null)
   const [dayOff, setDayOff] = useState<boolean[]>(() => loadJSON('tkb_dayoff', Array(14).fill(false)))
+  const [minimizeDays, setMinimizeDays] = useState(() => { try { const v = localStorage.getItem('tkb_minDays'); return v ? JSON.parse(v) : true } catch { return true } })
 
   useEffect(() => {
     if (data) {
@@ -63,6 +64,7 @@ export default function Home() {
   useEffect(() => { try { localStorage.setItem('tkb_selected', JSON.stringify(selectedCodes)) } catch {} }, [selectedCodes])
   useEffect(() => { try { localStorage.setItem('tkb_excluded', JSON.stringify([...excludedSessions])) } catch {} }, [excludedSessions])
   useEffect(() => { try { localStorage.setItem('tkb_dayoff', JSON.stringify(dayOff)) } catch {} }, [dayOff])
+  useEffect(() => { try { localStorage.setItem('tkb_minDays', JSON.stringify(minimizeDays)) } catch {} }, [minimizeDays])
 
   useEffect(() => {
     if (data && selectedCodes.length > 0) {
@@ -143,7 +145,7 @@ export default function Home() {
         .filter(s => programFilter === 'all' || s.programType === programFilter)
     )
     if (sessionsPerCourse.some(s => s.length === 0)) return
-    const prefs: UserPreferences = { dayOff, minimizeDays: true, minimizeGaps: true }
+    const prefs: UserPreferences = { dayOff, minimizeDays, minimizeGaps: true }
     const results = findAllSchedules(sessionsPerCourse, prefs, excludedSessions)
     setScheduleResults(results); setSelectedResult(0)
   }
@@ -314,6 +316,17 @@ export default function Home() {
                   </button>
                 ))}
               </div>
+            </div>}
+
+            {selectedCodes.length > 0 && <div className="px-4 py-3 border-b">
+              <div className="text-sm font-medium text-gray-500 mb-2 flex items-center gap-1">
+                <Sparkles className="w-4 h-4" /> Tuỳ chọn xếp
+              </div>
+              <label className="flex items-center gap-2 text-sm cursor-pointer mb-1">
+                <input type="checkbox" checked={minimizeDays} onChange={e => setMinimizeDays(e.target.checked)}
+                  className="accent-blue-600 w-4 h-4" />
+                <span>Ưu tiên xếp ít ngày nhất</span>
+              </label>
             </div>}
 
             <div className="p-4 mt-auto">
