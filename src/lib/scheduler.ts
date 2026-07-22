@@ -40,10 +40,21 @@ export function findAllSchedules(
   excluded: Set<string>
 ): ScheduleResult[] {
   const results: ScheduleResult[] = []
+  const seen = new Set<string>()
+
+  function scheduleKey(sessions: ClassSession[]): string {
+    return sessions
+      .map(s => `${s.courseCode}|${s.day}|${s.startPeriod}|${s.endPeriod}`)
+      .sort()
+      .join(',')
+  }
 
   function backtrack(idx: number, current: ClassSession[]) {
-    if (results.length >= 10000) return
+    if (results.length >= 500) return
     if (idx === courseSessions.length) {
+      const key = scheduleKey(current)
+      if (seen.has(key)) return
+      seen.add(key)
       const { score, daysCount, gaps } = scoreSchedule(current, prefs)
       results.push({ sessions: [...current], score, daysCount, gaps })
       return

@@ -40,11 +40,12 @@ export default function Home() {
   const [courseColors, setCourseColors] = useState<Map<string, string>>(new Map())
   const [heatmap, setHeatmap] = useState<number[][] | null>(null)
   const [viewMode, setViewMode] = useState<'heatmap' | 'timetable'>('heatmap')
-  const [scheduleResults, setScheduleResults] = useState<ScheduleResult[] | null>(() => loadJSON('tkb_results', null))
+  const [scheduleResults, setScheduleResults] = useState<ScheduleResult[] | null>(null)
   const [selectedResult, setSelectedResult] = useState(0)
   const [programFilter, setProgramFilter] = useState('all')
   const [excludedSessions, setExcludedSessions] = useState<Set<string>>(() => new Set(loadJSON('tkb_excluded', [])))
   const [expandedCourse, setExpandedCourse] = useState<string | null>(null)
+  const [classFilter, setClassFilter] = useState<Map<string, string>>(new Map())
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const [brushSelect, setBrushSelect] = useState<Set<string>>(new Set())
@@ -56,13 +57,12 @@ export default function Home() {
     if (data) {
       const obj: any = { courses: {}, sessions: data.sessions }
       data.courses.forEach((v, k) => { obj.courses[k] = v })
-      localStorage.setItem('tkb_data', JSON.stringify(obj))
-    } else localStorage.removeItem('tkb_data')
+      try { localStorage.setItem('tkb_data', JSON.stringify(obj)) } catch { /* quota */ }
+    } else try { localStorage.removeItem('tkb_data') } catch {}
   }, [data])
-  useEffect(() => { localStorage.setItem('tkb_selected', JSON.stringify(selectedCodes)) }, [selectedCodes])
-  useEffect(() => { localStorage.setItem('tkb_excluded', JSON.stringify([...excludedSessions])) }, [excludedSessions])
-  useEffect(() => { localStorage.setItem('tkb_dayoff', JSON.stringify(dayOff)) }, [dayOff])
-  useEffect(() => { localStorage.setItem('tkb_results', JSON.stringify(scheduleResults)) }, [scheduleResults])
+  useEffect(() => { try { localStorage.setItem('tkb_selected', JSON.stringify(selectedCodes)) } catch {} }, [selectedCodes])
+  useEffect(() => { try { localStorage.setItem('tkb_excluded', JSON.stringify([...excludedSessions])) } catch {} }, [excludedSessions])
+  useEffect(() => { try { localStorage.setItem('tkb_dayoff', JSON.stringify(dayOff)) } catch {} }, [dayOff])
 
   useEffect(() => {
     if (data && selectedCodes.length > 0) {
@@ -273,7 +273,14 @@ export default function Home() {
                         <button onClick={e => { e.stopPropagation(); removeCourse(code) }}
                           className="text-red-300 hover:text-red-600"><X className="w-3.5 h-3.5" /></button>
                       </div>
-                      {isExpanded && <div className="px-3 pb-3 space-y-1.5">
+                        {isExpanded && <div className="px-3 pb-3 space-y-1.5">
+                        <div className="relative">
+                          <Search className="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-gray-300" />
+                          <input value={classFilter.get(code) || ''}
+                            onChange={e => setClassFilter(prev => { const n = new Map(prev); n.set(code, e.target.value); return n })}
+                            placeholder="Tìm mã lớp, giờ, phòng..."
+                            className="w-full border rounded pl-7 pr-2 py-1 text-[11px]" />
+                        </div>
                         {uniqueClasses.map(s => {
                           const isBlocked = excludedSessions.has(s.maLop)
                           const matched = currentResult?.sessions.find(x => x.maLop === s.maLop)
@@ -393,7 +400,7 @@ export default function Home() {
             {data && viewMode === 'timetable' && <div>
               <div className="flex items-center gap-2 mb-4">
                 <Table2 className="w-5 h-5 text-blue-500" />
-                <h3 className="text-base font-medium">Timetable</h3>
+                <h3 className="text-base font-medium">{currentResult ? 'Timetable kết quả' : 'Timetable - click môn để xem lớp'}</h3>
               </div>
               <div className="overflow-auto border rounded-xl bg-white shadow-sm">
                 <table className="border-collapse w-full min-w-[700px]">
@@ -412,26 +419,19 @@ export default function Home() {
                       <tr key={p}>
                         <td className="text-xs text-gray-400 p-1 text-right pr-2">{p}<br />{PERIOD_TIME[p]}</td>
                         {DAY_INDICES.map(d => {
-                          const cellSessions = visibleSessions.filter(s => s.day === d && s.startPeriod <= p && s.endPeriod >= p)
-                          if (cellSessions.length === 0) return <td key={d} className="border border-gray-100" />
-                          const unique = cellSessions.filter((s, i, arr) => i === arr.findIndex(x => x.maLop === s.maLop))
+                          const s = currentResult
+                            ? currentResult.sessions.find((s: ClassSession) => s.day === d && s.startPeriod <= p && s.endPeriod >= p)
+                            : null
+                          if (!s) return <td key={d} className="border border-gray-50" />
+                          const color = courseColors.get(s.courseCode) || '#888'
+                          const isFirst = s.startPeriod === p
                           return (
-                            <td key={d} className="border border-gray-100 p-0.5 align-top">
-                              <div className="flex flex-col gap-0.5">
-                                {unique.slice(0, 3).map(s => {
-                                  const color = courseColors.get(s.courseCode) || '#888'
-                                  const isSelected = currentResult?.sessions?.some(rs => rs.maLop === s.maLop)
-                                  const isBlocked = excludedSessions.has(s.maLop)
-                                  return (
-                                    <div key={s.maLop + p}
-                                      className={`text-xs leading-tight px-1 py-0.5 rounded truncate ${isBlocked ? 'opacity-30 line-through' : ''} ${isSelected ? 'ring-2 ring-blue-500 font-bold' : ''}`}
-                                      style={{ backgroundColor: color + '20', color, borderLeft: `3px solid ${color}` }}>
-                                      {s.courseCode}
-                                    </div>
-                                  )
-                                })}
-                                {unique.length > 3 && <span className="text-[10px] text-gray-400">+{unique.length - 3}</span>}
-                              </div>
+                            <td key={d} className="border p-1 text-center" style={{ backgroundColor: isFirst ? color + '20' : color + '08' }}>
+                              {isFirst && <div className="text-xs leading-tight" style={{ color }}>
+                                <div className="font-medium">{s.courseCode}</div>
+                                <div className="text-gray-500 text-[10px]">{s.maLop}</div>
+                                <div className="text-gray-400 text-[9px]">{s.room}</div>
+                              </div>}
                             </td>
                           )
                         })}
@@ -456,43 +456,12 @@ export default function Home() {
                 </div>
               </div>
               <div className="text-sm text-gray-500 mb-4">Còn <strong>{scheduleResults!.length - selectedResult - 1}</strong> cách xếp khác</div>
-              <div className="overflow-auto border rounded-xl">
-                <table className="border-collapse w-full min-w-[700px]">
-                  <thead>
-                    <tr>
-                      <th className="w-20 p-2 text-left text-gray-500 font-medium text-xs">Giờ</th>
-                      {DAY_LABELS.map((d, i) => (
-                        <th key={i} className="p-2 text-center text-sm font-medium">{d}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {PERIODS.map(p => (
-                      <tr key={p}>
-                        <td className="text-xs text-gray-400 p-1 text-right pr-2">{PERIOD_TIME[p]}</td>
-                        {DAY_INDICES.map(d => {
-                          const s = currentResult.sessions.find((s: ClassSession) => s.day === d && s.startPeriod <= p && s.endPeriod >= p)
-                          if (!s) return <td key={d} className="border border-gray-50" />
-                          const color = courseColors.get(s.courseCode) || '#888'
-                          const isFirst = s.startPeriod === p
-                          return (
-                            <td key={d} className="border p-1 text-center" style={{ backgroundColor: isFirst ? color + '20' : color + '08' }}>
-                              {isFirst && <div className="text-xs leading-tight" style={{ color }}>
-                                <div className="font-medium">{s.courseCode}</div>
-                                <div className="text-gray-500 text-[10px]">{s.room}</div>
-                              </div>}
-                            </td>
-                          )
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="mt-4">
+              <div className="mb-4">
                 <h4 className="text-sm font-medium text-gray-600 mb-2">Chi tiết lớp đã xếp:</h4>
                 <div className="space-y-1.5">
-                  {currentResult.sessions.map((s: ClassSession, i: number) => {
+                  {[...currentResult.sessions]
+                    .sort((a: ClassSession, b: ClassSession) => a.day * 100 + a.startPeriod - (b.day * 100 + b.startPeriod))
+                    .map((s: ClassSession, i: number) => {
                     const color = courseColors.get(s.courseCode) || '#888'
                     const course = data?.courses.get(s.courseCode)
                     return (
@@ -500,7 +469,7 @@ export default function Home() {
                         <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
                         <span className="font-medium w-20">{s.courseCode}</span>
                         <span className="text-gray-700 flex-1 truncate">{course?.name || s.courseName}</span>
-                        <span className="text-gray-500 w-28">{s.maLop}</span>
+                        <span className="text-gray-500 w-28 font-mono text-xs">{s.maLop}</span>
                         <span className="text-gray-400">{DAY_LABELS[s.day]} {s.timeStr}</span>
                         <span className="text-gray-400 w-20 text-right">{s.room}</span>
                       </div>

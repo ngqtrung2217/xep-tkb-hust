@@ -31,8 +31,12 @@ export function parseExcelData(data: any[][]): { courses: Map<string, Course>; s
     const day = !isNaN(dayRaw) && dayRaw >= 2 ? dayRaw - 2 : -1
     if (day < 0) continue
 
-    const startP = Number(r[COL.BD]) || 0
-    const endP = Number(r[COL.KT]) || 0
+    const startRaw = Number(r[COL.BD]) || 0
+    const endRaw = Number(r[COL.KT]) || 0
+    const shift = String(r[COL.KIP] || '').trim()
+    const shiftOffset = shift === 'Chiều' ? 6 : 0
+    const startP = startRaw + shiftOffset
+    const endP = endRaw + shiftOffset
     if (startP < 1 || endP < startP) continue
 
     sessions.push({
