@@ -15,3 +15,9 @@ export const COURSE_COLORS = [
 ]
 
 export const PROGRAMS = ['CT CHUẨN', 'ELITECH', 'SIE'] as const
+
+export function parseCredits(s: string): number {
+  if (!s) return 0
+  const m = s.match(/^(\d+)/)
+  return m ? parseInt(m[1]) : 0
+}

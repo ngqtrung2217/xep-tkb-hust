@@ -3,12 +3,12 @@ import { useRef, useState, useCallback, useEffect } from 'react'
 import { ClassSession, Course, UserPreferences, ScheduleResult } from '@/lib/types'
 import { parseExcelData } from '@/lib/parser'
 import { findAllSchedules, buildHeatmap } from '@/lib/scheduler'
-import { COURSE_COLORS, DAY_LABELS, DAY_INDICES, PERIODS, PERIOD_TIME } from '@/lib/constants'
+import { COURSE_COLORS, DAY_LABELS, DAY_INDICES, PERIODS, PERIOD_TIME, parseCredits } from '@/lib/constants'
 import * as XLSX from 'xlsx'
 import {
   Upload, Search, Plus, X, Calendar, SlidersHorizontal,
   ChevronLeft, ChevronRight, Save, Download, Sparkles, Flame,
-  CheckCircle2, Table2, ListOrdered
+  CheckCircle2, Table2, ListOrdered, CircleHelp
 } from 'lucide-react'
 
 const DAY_OFF_LABELS: [string, boolean][] = [
@@ -53,6 +53,8 @@ export default function Home() {
   const [parseError, setParseError] = useState<string | null>(null)
   const [dayOff, setDayOff] = useState<boolean[]>(() => loadJSON('tkb_dayoff', Array(14).fill(false)))
   const [minimizeDays, setMinimizeDays] = useState(() => { try { const v = localStorage.getItem('tkb_minDays'); return v ? JSON.parse(v) : true } catch { return true } })
+  const [minimizeGaps, setMinimizeGaps] = useState(() => { try { const v = localStorage.getItem('tkb_minGaps'); return v ? JSON.parse(v) : true } catch { return true } })
+  const [tooltip, setTooltip] = useState<string | null>(null)
 
   useEffect(() => {
     if (data) {
@@ -65,6 +67,7 @@ export default function Home() {
   useEffect(() => { try { localStorage.setItem('tkb_excluded', JSON.stringify([...excludedSessions])) } catch {} }, [excludedSessions])
   useEffect(() => { try { localStorage.setItem('tkb_dayoff', JSON.stringify(dayOff)) } catch {} }, [dayOff])
   useEffect(() => { try { localStorage.setItem('tkb_minDays', JSON.stringify(minimizeDays)) } catch {} }, [minimizeDays])
+  useEffect(() => { try { localStorage.setItem('tkb_minGaps', JSON.stringify(minimizeGaps)) } catch {} }, [minimizeGaps])
 
   useEffect(() => {
     if (data && selectedCodes.length > 0) {
@@ -145,7 +148,7 @@ export default function Home() {
         .filter(s => programFilter === 'all' || s.programType === programFilter)
     )
     if (sessionsPerCourse.some(s => s.length === 0)) return
-    const prefs: UserPreferences = { dayOff, minimizeDays, minimizeGaps: true }
+    const prefs: UserPreferences = { dayOff, minimizeDays, minimizeGaps, preferredSlots: [...brushSelect] }
     const results = findAllSchedules(sessionsPerCourse, prefs, excludedSessions)
     setScheduleResults(results); setSelectedResult(0)
   }
@@ -256,7 +259,12 @@ export default function Home() {
             </div>
 
             {selectedCodes.length > 0 && <div className="px-4 py-3 border-b flex-1 overflow-y-auto">
-              <div className="text-sm font-medium text-gray-500 mb-3">Môn đã chọn ({selectedCodes.length})</div>
+              <div className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
+                <span>Môn đã chọn ({selectedCodes.length})</span>
+                <span className="text-xs font-normal text-gray-400">
+                  — {selectedCodes.reduce((sum, code) => sum + parseCredits(data?.courses.get(code)?.credits || ''), 0)} TC
+                </span>
+              </div>
               <div className="space-y-2">
                 {selectedCodes.map(code => {
                   const c = data.courses.get(code)
@@ -322,11 +330,28 @@ export default function Home() {
               <div className="text-sm font-medium text-gray-500 mb-2 flex items-center gap-1">
                 <Sparkles className="w-4 h-4" /> Tuỳ chọn xếp
               </div>
-              <label className="flex items-center gap-2 text-sm cursor-pointer mb-1">
+              <label className="flex items-center gap-2 text-sm cursor-pointer mb-2">
                 <input type="checkbox" checked={minimizeDays} onChange={e => setMinimizeDays(e.target.checked)}
                   className="accent-blue-600 w-4 h-4" />
                 <span>Ưu tiên xếp ít ngày nhất</span>
               </label>
+              <label className="flex items-center gap-2 text-sm cursor-pointer mb-2">
+                <input type="checkbox" checked={minimizeGaps} onChange={e => setMinimizeGaps(e.target.checked)}
+                  className="accent-blue-600 w-4 h-4" />
+                <span>Ưu tiên ít cửa sổ trống</span>
+                <span className="relative inline-flex">
+                  <CircleHelp className="w-3.5 h-3.5 text-gray-400 cursor-help"
+                    onMouseEnter={() => setTooltip('gap')}
+                    onMouseLeave={() => setTooltip(null)}
+                    onClick={() => setTooltip(tooltip === 'gap' ? null : 'gap')} />
+                  {tooltip === 'gap' && <span className="absolute z-20 bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-gray-800 text-white text-[10px] rounded shadow-lg w-48 text-center pointer-events-none">
+                    Cửa sổ trống = khoảng trống giữa 2 tiết học trong cùng ngày. VD: học tiết 1-2, trống tiết 3-4, học tiết 5-6 → có 2 cửa sổ trống.
+                  </span>}
+                </span>
+              </label>
+              <div className="text-xs text-gray-400 mt-1">
+                {brushSelect.size > 0 && <span className="text-blue-500">✓ Đã chọn {brushSelect.size} khung giờ yêu thích trên heatmap</span>}
+              </div>
             </div>}
 
             <div className="p-4 mt-auto">

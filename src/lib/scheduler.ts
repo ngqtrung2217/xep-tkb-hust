@@ -31,6 +31,15 @@ function scoreSchedule(
   if (prefs.minimizeDays) score -= daysCount * 100
   if (prefs.minimizeGaps) score -= gaps * 5
 
+  if (prefs.preferredSlots.length > 0) {
+    const prefSet = new Set(prefs.preferredSlots)
+    for (const s of sessions) {
+      for (let p = s.startPeriod; p <= s.endPeriod; p++) {
+        if (prefSet.has(`${s.day}-${p}`)) score += 3
+      }
+    }
+  }
+
   return { score, daysCount, gaps }
 }
 

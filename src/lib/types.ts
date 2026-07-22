@@ -31,6 +31,7 @@ export interface UserPreferences {
   dayOff: boolean[]
   minimizeDays: boolean
   minimizeGaps: boolean
+  preferredSlots: string[]
 }
 
 export interface ScheduleResult {
