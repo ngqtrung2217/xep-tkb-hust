@@ -1,0 +1,12 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+*.xlsx
+*.xls
+.playwright-mcp/
+tkb-hust-snapshot.md
+tkb-hust-full.md
+nusmods-snapshot.md
+nus-optimizer-snapshot.md
