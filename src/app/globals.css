@@ -2,10 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --day-colors: #3b82f6 #ef4444 #10b981 #f59e0b #8b5cf6 #ec4899;
-}
-
 body {
   font-family: system-ui, -apple-system, sans-serif;
+}
+
+.tkb-grid td {
+  border: 1px solid #d1d5db;
+}
+
+.tkb-grid th {
+  border: 1px solid #d1d5db;
+}
+
+.tkb-grid td.border-b-2 {
+  border-bottom-width: 3px !important;
+  border-bottom-color: #6b7280;
+}
+
+.tkb-grid .afternoon-row td {
+  border-top: 3px solid #9ca3af;
 }

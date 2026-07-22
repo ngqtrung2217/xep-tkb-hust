@@ -379,8 +379,7 @@ export default function Home() {
                 <h3 className="text-base font-medium">Heatmap số lớp mở</h3>
               </div>
               <div className="overflow-auto border rounded-xl bg-white shadow-sm">
-                <table className="border-collapse w-full min-w-[700px]">
-                  <thead>
+                <table className="border-collapse w-full min-w-[700px] tkb-grid">                  <thead>
                     <tr>
                       <th className="w-20 p-2 text-xs text-gray-500 text-left font-medium">Tiết</th>
                       {DAY_LABELS.map((d, i) => (
@@ -393,8 +392,7 @@ export default function Home() {
                   </thead>
                   <tbody>
                     {PERIODS.map(p => (
-                      <tr key={p} className="hover:bg-gray-50">
-                        <td className="text-xs text-gray-400 p-1 text-right pr-2 align-middle">{p}<br /><span className="text-gray-300">{PERIOD_TIME[p]}</span></td>
+                      <tr key={p} className={`hover:bg-gray-50 ${p === 7 ? 'afternoon-row' : ''}`}>                        <td className="text-xs text-gray-400 p-1 text-right pr-2 align-middle">{p}<br /><span className="text-gray-300">{PERIOD_TIME[p]}</span></td>
                         {DAY_INDICES.map(d => {
                           const val = heatmap[d]?.[p - 1] || 0
                           return (
@@ -416,8 +414,7 @@ export default function Home() {
                 <h3 className="text-base font-medium">{currentResult ? 'Timetable kết quả' : 'Timetable - click môn để xem lớp'}</h3>
               </div>
               <div className="overflow-auto border rounded-xl bg-white shadow-sm">
-                <table className="border-collapse w-full min-w-[700px]">
-                  <thead>
+                <table className="border-collapse w-full min-w-[700px] tkb-grid">                  <thead>
                     <tr>
                       <th className="w-20 p-2 text-left text-gray-500 font-medium text-xs">Giờ</th>
                       {DAY_LABELS.map((d, i) => (
@@ -429,7 +426,7 @@ export default function Home() {
                   </thead>
                   <tbody>
                     {PERIODS.map(p => (
-                      <tr key={p}>
+                       <tr key={p} className={p === 7 ? 'afternoon-row' : ''}>
                         <td className="text-xs text-gray-400 p-1 text-right pr-2">{p}<br />{PERIOD_TIME[p]}</td>
                         {DAY_INDICES.map(d => {
                           const s = currentResult
