@@ -736,7 +736,12 @@ export default function Home() {
                            const sessions = currentResult
                              ? currentResult.sessions.filter((s: ClassSession) => s.day === d && s.startPeriod <= p && s.endPeriod >= p)
                              : []
-                           if (sessions.length === 0) return <td key={d} className="border border-gray-50 p-0" style={{ minHeight: 52 }} />
+                            if (sessions.length === 0) {
+                              const isAvd = avoidedSlots.has(`${d}-${p}`)
+                              const isDayOff = dayOff[d * 2 + (p >= 7 ? 1 : 0)]
+                              if (isAvd || isDayOff) return <td key={d} className="border p-0 text-center align-middle" style={{ minHeight: 52, backgroundColor: isAvd ? '#fecaca' : '#f3f4f6' }}>{isAvd ? <span className="text-red-300 text-[10px]">✕</span> : null}</td>
+                              return <td key={d} className="border border-gray-50 p-0" style={{ minHeight: 52 }} />
+                            }
                            const starts = sessions.filter((s: ClassSession) => s.startPeriod === p)
                            const unique = sessions.filter((s: ClassSession, i: number, arr: ClassSession[]) => i === arr.findIndex(x => x.maLop === s.maLop))
                             return (
