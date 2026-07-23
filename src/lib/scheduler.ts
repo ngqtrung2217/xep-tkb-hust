@@ -60,8 +60,8 @@ export function findAllSchedules(
         }
       }
       let score = 0
-      if (prefs.minimizeDays) score -= daysCount * 100
-      if (prefs.minimizeGaps) score -= gaps * 5
+      if (prefs.minimizeDays) score -= daysCount * 200
+      if (prefs.minimizeGaps) score -= gaps * 30
       if (prefs.preferredSlots.length > 0) {
         const prefSet = new Set(prefs.preferredSlots)
         for (const s of current) for (let p = s.startPeriod; p <= s.endPeriod; p++) if (prefSet.has(`${s.day}-${p}`)) score += 3
