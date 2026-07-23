@@ -445,12 +445,9 @@ export default function Home() {
                 className="w-full border rounded-lg px-3 py-2 text-sm mt-2 resize-none"
                 onPaste={e => {
                   const text = (e.clipboardData || (window as any).clipboardData).getData('text')
-                  const codes = text.split('\n').map(line => {
-                    const parts = line.trim().split('\t')
-                    const raw = (parts[0] || '').trim()
-                    const m = raw.match(/^[A-Za-z]{2}\d{4}[A-Za-z]?$/)
-                    return m ? m[0].toUpperCase() : null
-                  }).filter(Boolean) as string[]
+                  const codes = (text.match(/[A-Za-z]{2}\d{4}[A-Za-z]?/g) || [])
+                    .map(c => c.toUpperCase())
+                    .filter((c, i, a) => a.indexOf(c) === i)
                   if (codes.length > 0) {
                     e.preventDefault()
                     const ok: string[] = [], fail: string[] = []
