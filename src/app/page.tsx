@@ -56,7 +56,7 @@ export default function Home() {
   const [minimizeGaps, setMinimizeGaps] = useState(() => { try { const v = localStorage.getItem('tkb_minGaps'); return v ? JSON.parse(v) : true } catch { return true } })
   const [weekAware, setWeekAware] = useState(() => { try { const v = localStorage.getItem('tkb_weekAware'); return v ? JSON.parse(v) : true } catch { return true } })
   const [tooltip, setTooltip] = useState<string | null>(null)
-  const [heatHover, setHeatHover] = useState<{ day: number; period: number } | null>(null)
+  const [heatHover, setHeatHover] = useState<{ day: number; period: number; x: number; y: number } | null>(null)
   const [ttHover, setTtHover] = useState<{ sessions: ClassSession[]; x: number; y: number } | null>(null)
   const [hiddenCourses, setHiddenCourses] = useState<Set<string>>(new Set())
   const [showDayOff, setShowDayOff] = useState(true)
@@ -65,6 +65,11 @@ export default function Home() {
   const [schedProgress, setSchedProgress] = useState(0)
   const [toast, setToast] = useState<{ msg: string; suggestion?: string } | null>(null)
   const [heatmapFilter, setHeatmapFilter] = useState('')
+  const [copied, setCopied] = useState('')
+
+  const copyText = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => { setCopied(text); setTimeout(() => setCopied(''), 1500) })
+  }
 
   useEffect(() => { try { localStorage.removeItem('tkb_results') } catch {} }, [])
 
@@ -559,14 +564,21 @@ export default function Home() {
             </div>}
 
             {data && viewMode === 'heatmap' && heatmap && <div>
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-3 flex-wrap">
                 <Flame className="w-5 h-5 text-orange-500" />
-                <h3 className="text-base font-medium">Heatmap số lớp mở</h3>
-                <select className="ml-auto text-xs border rounded-lg px-2 py-1 bg-white" value={heatmapFilter}
-                  onChange={e => setHeatmapFilter(e.target.value)}>
-                  <option value="">Tất cả môn</option>
-                  {selectedCodes.map(code => <option key={code} value={code}>{code}</option>)}
-                </select>
+                <h3 className="text-base font-medium">Heatmap</h3>
+                <div className="flex gap-1.5 flex-wrap ml-2">
+                  <button onClick={() => setHeatmapFilter('')}
+                    className={`text-xs px-2.5 py-1 rounded-full border transition ${heatmapFilter === '' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}>
+                    Tất cả
+                  </button>
+                  {selectedCodes.map(code => (
+                    <button key={code} onClick={() => setHeatmapFilter(heatmapFilter === code ? '' : code)}
+                      className={`text-xs px-2.5 py-1 rounded-full border transition ${heatmapFilter === code ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}>
+                      {code}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="overflow-auto border rounded-xl bg-white shadow-sm">
                 <table className="border-collapse w-full min-w-[700px] tkb-grid" style={{ tableLayout: 'fixed' }}>                  <thead>                    <tr>
@@ -589,36 +601,29 @@ export default function Home() {
                           const isHover = heatHover?.day === d && heatHover?.period === p
                           return (
                             <td key={d}
-                              onMouseEnter={() => setHeatHover({ day: d, period: p })}
+                              onMouseEnter={e => { const r = (e.target as HTMLElement).getBoundingClientRect(); setHeatHover({ day: d, period: p, x: r.left + r.width / 2, y: r.top }) }}
                               onMouseLeave={() => setHeatHover(null)}
-                              className="border text-sm text-center p-1 relative cursor-default"
+                              className="border text-sm text-center p-1 cursor-default"
                               style={{ backgroundColor: getHeatColor(val, maxHeat) }}>
                               {val > 0 && <span className="font-medium">{val}</span>}
-                              {isHover && unique.length > 0 && (
-                                <div className="fixed z-[9999] bottom-4 left-1/2 -translate-x-1/2 px-4 py-3 bg-gray-900 text-white text-sm rounded-xl shadow-2xl pointer-events-none max-w-md">
-                                  <div className="font-semibold text-sm mb-1">{DAY_LABELS[d]} - Tiết {p} ({PERIOD_TIME[p]})</div>
-                                  <div className="text-gray-300 mb-1">Tổng số: <strong className="text-white">{val}</strong> lớp — <strong className="text-white">{unique.length}</strong> môn</div>
-                                  <div className="space-y-0.5">
-                                  {unique.slice(0, 10).map(code => {
-                                    const count = cellCourses.filter(s => s.courseCode === code).length
-                                    return (
-                                      <div key={code} className="flex items-center gap-1.5">
-                                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: courseColors.get(code) || '#888' }} />
-                                        <span className="font-medium">{code}</span>
-                                        <span className="text-gray-400">({count} lớp)</span>
-                                      </div>
-                                    )
-                                  })}
-                                  <div className="text-gray-500 mt-1 pt-1 border-t border-gray-700 text-[10px]">
-                                    {unique.slice(0, 3).map(code => {
-                                      const w = cellCourses.find(s => s.courseCode === code)?.weeks
-                                      return w ? <div key={code}>Tuần {w}</div> : null
-                                    })}
-                                  </div>
-                                  {unique.length > 10 && <div className="text-gray-400 mt-0.5">+{unique.length - 10} môn khác</div>}
-                                  </div>
-                                </div>
-                              )}
+                              {isHover && unique.length > 0 && <div className="fixed z-[9999] px-4 py-3 bg-gray-900 text-white text-sm rounded-xl shadow-2xl pointer-events-none max-w-md"
+                                style={{ left: heatHover.x, top: heatHover.y, transform: 'translate(-50%, -105%)' }}>
+                                <div className="font-semibold text-sm mb-1">{DAY_LABELS[d]} - Tiết {p} ({PERIOD_TIME[p]})</div>
+                                <div className="text-gray-300 mb-1">Tổng số: <strong className="text-white">{val}</strong> lớp — <strong className="text-white">{unique.length}</strong> môn</div>
+                                {unique.slice(0, 10).map(code => {
+                                  const count = cellCourses.filter(s => s.courseCode === code).length
+                                  const w = cellCourses.find(s => s.courseCode === code)?.weeks
+                                  return (
+                                    <div key={code} className="flex items-center gap-1.5 text-xs">
+                                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: courseColors.get(code) || '#888' }} />
+                                      <span className="font-medium">{code}</span>
+                                      <span className="text-gray-400">({count} lớp)</span>
+                                      {w && <span className="text-gray-500">tuần {w}</span>}
+                                    </div>
+                                  )
+                                })}
+                                {unique.length > 10 && <div className="text-gray-400 text-xs mt-1">+{unique.length - 10} môn khác</div>}
+                              </div>}
                             </td>
                           )
                         })}
@@ -673,7 +678,9 @@ export default function Home() {
                                        style={{ backgroundColor: color + '18', borderTop: `2px solid ${color}` }}>
                                        <div className="font-semibold text-xs flex justify-between" style={{ color }}>
                                          <span>{s.courseCode}</span>
-                                         <span className="text-gray-500 font-normal text-[9px]">{s.maLop}</span>
+                                          <span className="text-gray-500 font-normal text-[9px] cursor-pointer hover:text-blue-500"
+                                            onClick={e => { e.stopPropagation(); copyText(s.maLop) }}
+                                            title="Click để copy mã lớp">{copied === s.maLop ? '✓' : s.maLop}</span>
                                        </div>
                                        <div className="flex justify-between items-end flex-1">
                                          <span className="text-gray-500">{s.room || ''}</span>
@@ -742,7 +749,8 @@ export default function Home() {
                       <div key={i} className="text-sm flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border">
                         <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
                         <span className="font-medium w-24 flex-shrink-0">{s.courseCode}</span>
-                        <span className="font-mono text-xs text-gray-600 w-28 flex-shrink-0">{s.maLop} <span className="text-gray-400">{s.classType}</span></span>
+                        <span className="font-mono text-xs text-gray-600 w-28 flex-shrink-0 cursor-pointer hover:text-blue-600"
+                          onClick={() => copyText(s.maLop)} title="Click để copy">{copied === s.maLop ? '✓' : s.maLop} <span className="text-gray-400">{s.classType}</span></span>
                         <span className="text-gray-700 truncate flex-1 min-w-0">{course?.name || s.courseName}</span>
                         <span className="text-gray-500 w-28 flex-shrink-0 text-right">{DAY_LABELS[s.day]} {s.timeStr}</span>
                         <span className="text-gray-500 w-20 flex-shrink-0 text-right">{s.room}</span>
