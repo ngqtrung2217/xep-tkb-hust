@@ -8,7 +8,7 @@ import * as XLSX from 'xlsx'
 import {
   Upload, Search, Plus, X, Calendar, SlidersHorizontal,
   ChevronLeft, ChevronRight, Save, Download, Sparkles, Flame,
-  CheckCircle2, Table2, ListOrdered, CircleHelp, Eye, EyeOff, ChevronDown
+  CheckCircle2, Table2, ListOrdered, CircleHelp, Eye, EyeOff, ChevronDown, Loader2
 } from 'lucide-react'
 
 const DAY_OFF_LABELS: [string, boolean][] = [
@@ -60,6 +60,8 @@ export default function Home() {
   const [hiddenCourses, setHiddenCourses] = useState<Set<string>>(new Set())
   const [showDayOff, setShowDayOff] = useState(true)
   const [showOptions, setShowOptions] = useState(true)
+  const [scheduling, setScheduling] = useState(false)
+  const [schedProgress, setSchedProgress] = useState(0)
 
   useEffect(() => { try { localStorage.removeItem('tkb_results') } catch {} }, [])
 
@@ -155,7 +157,12 @@ export default function Home() {
     if (!data || selectedCodes.length === 0) return
     const activeCodes = selectedCodes.filter(code => !hiddenCourses.has(code))
     if (activeCodes.length === 0) return
-    const sessionsPerCourse: ClassSession[][][] = []
+    setScheduling(true)
+    setSchedProgress(0)
+    setScheduleResults(null)
+
+    setTimeout(() => {
+      const sessionsPerCourse: ClassSession[][][] = []
     for (const code of activeCodes) {
       const all = data.sessions.filter(s => s.courseCode === code).filter(s => programFilter === 'all' || s.programType === programFilter)
       const ltPlusBt: ClassSession[][] = []
@@ -215,8 +222,10 @@ export default function Home() {
     }
     if (sessionsPerCourse.some(s => s.length === 0)) return
     const prefs: UserPreferences = { dayOff, minimizeDays, minimizeGaps, preferredSlots: [...brushSelect], weekAware }
-    const results = findAllSchedules(sessionsPerCourse, prefs, excludedSessions)
-    setScheduleResults(results); setSelectedResult(0)
+      const results = findAllSchedules(sessionsPerCourse, prefs, excludedSessions, setSchedProgress)
+      setScheduleResults(results); setSelectedResult(0)
+      setScheduling(false)
+    }, 50)
   }
 
   const toggleDayOff = (idx: number) => {
@@ -482,9 +491,9 @@ export default function Home() {
             </div>}
 
             <div className="p-4 mt-auto">
-              <button onClick={runScheduler} disabled={selectedCodes.length === 0}
+              <button onClick={runScheduler} disabled={selectedCodes.length === 0 || scheduling}
                 className="w-full bg-blue-600 text-white rounded-xl py-3 font-semibold text-base hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition shadow-sm">
-                <Sparkles className="w-5 h-5" /> Xếp thời khóa biểu
+                {scheduling ? <><Loader2 className="w-5 h-5 animate-spin" /> Đang xếp... {schedProgress}%</> : <><Sparkles className="w-5 h-5" /> Xếp thời khóa biểu</>}
               </button>
             </div>
           </>}
