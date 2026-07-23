@@ -152,13 +152,62 @@ export default function Home() {
     const activeCodes = selectedCodes.filter(code => !hiddenCourses.has(code))
     if (activeCodes.length === 0) return
     const sessionsPerCourse = activeCodes.map(code => {
-      const byKey = new Map<string, ClassSession[]>()
-      for (const s of data.sessions.filter(s => s.courseCode === code).filter(s => programFilter === 'all' || s.programType === programFilter)) {
+      const all = data.sessions.filter(s => s.courseCode === code).filter(s => programFilter === 'all' || s.programType === programFilter)
+      const ltPlusBt: ClassSession[][] = []
+
+      const lt = all.filter(s => s.classType === 'LT')
+      const bt = all.filter(s => s.classType === 'BT')
+      const ltbt = all.filter(s => s.classType === 'LT+BT')
+      const tn = all.filter(s => s.classType === 'TN')
+      const other = all.filter(s => s.classType !== 'LT' && s.classType !== 'BT' && s.classType !== 'LT+BT' && s.classType !== 'TN')
+
+      const ltByMaLop = new Map<string, ClassSession[]>()
+      for (const s of lt) {
         const key = s.maLopKem && s.maLopKem !== s.maLop ? s.maLopKem : s.maLop
-        if (!byKey.has(key)) byKey.set(key, [])
-        byKey.get(key)!.push(s)
+        if (!ltByMaLop.has(key)) ltByMaLop.set(key, [])
+        ltByMaLop.get(key)!.push(s)
       }
-      return [...byKey.values()]
+
+      const btByMaLop = new Map<string, ClassSession[]>()
+      for (const s of bt) {
+        if (!btByMaLop.has(s.maLop)) btByMaLop.set(s.maLop, [])
+        btByMaLop.get(s.maLop)!.push(s)
+      }
+
+      for (const [ltKey, ltSessions] of ltByMaLop) {
+        const matchedBt = [...btByMaLop].filter(([_, sessions]) => sessions[0].maLopKem === ltKey)
+        if (matchedBt.length > 0) {
+          for (const [_, btSessions] of matchedBt) {
+            ltPlusBt.push([...ltSessions, ...btSessions])
+          }
+        } else {
+          ltPlusBt.push(ltSessions)
+        }
+      }
+      for (const [_, btSessions] of btByMaLop) {
+        const ltKey = btSessions[0].maLopKem
+        if (ltKey && ltKey !== 'NULL' && !ltByMaLop.has(ltKey)) ltPlusBt.push(btSessions)
+      }
+
+      const tnByMaLop = new Map<string, ClassSession[]>()
+      for (const s of tn) {
+        if (!tnByMaLop.has(s.maLop)) tnByMaLop.set(s.maLop, [])
+        tnByMaLop.get(s.maLop)!.push(s)
+      }
+
+      const ltbtByMaLop = new Map<string, ClassSession[]>()
+      for (const s of ltbt) {
+        if (!ltbtByMaLop.has(s.maLop)) ltbtByMaLop.set(s.maLop, [])
+        ltbtByMaLop.get(s.maLop)!.push(s)
+      }
+
+      const otherByMaLop = new Map<string, ClassSession[]>()
+      for (const s of other) {
+        if (!otherByMaLop.has(s.maLop)) otherByMaLop.set(s.maLop, [])
+        otherByMaLop.get(s.maLop)!.push(s)
+      }
+
+      return [...ltPlusBt, ...btByMaLop.values(), ...ltbtByMaLop.values(), ...tnByMaLop.values(), ...otherByMaLop.values()]
     })
     if (sessionsPerCourse.some(s => s.length === 0)) return
     const prefs: UserPreferences = { dayOff, minimizeDays, minimizeGaps, preferredSlots: [...brushSelect], weekAware }
@@ -277,11 +326,12 @@ export default function Home() {
                 rows={2}
                 className="w-full border rounded-lg px-3 py-2 text-sm mt-2 resize-none"
                 onPaste={e => {
-                  const text = e.clipboardData.getData('text')
+                  const text = (e.clipboardData || (window as any).clipboardData).getData('text')
                   const codes = text.split('\n').map(line => {
                     const parts = line.trim().split('\t')
-                    const m = parts[0]?.trim().match(/^[A-Z]{2}\d{4}[A-Z]?/)
-                    return m ? m[0] : null
+                    const raw = (parts[0] || '').trim()
+                    const m = raw.match(/^[A-Za-z]{2}\d{4}[A-Za-z]?$/)
+                    return m ? m[0].toUpperCase() : null
                   }).filter(Boolean) as string[]
                   if (codes.length > 0) {
                     e.preventDefault()
