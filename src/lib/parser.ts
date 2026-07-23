@@ -34,10 +34,20 @@ export function parseExcelData(data: any[][]): { courses: Map<string, Course>; s
     const startRaw = Number(r[COL.BD]) || 0
     const endRaw = Number(r[COL.KT]) || 0
     const shift = String(r[COL.KIP] || '').trim()
-    const shiftOffset = shift === 'Chiều' ? 6 : 0
-    const startP = startRaw + shiftOffset
-    const endP = endRaw + shiftOffset
-    if (startP < 1 || endP < startP) continue
+    let startP = startRaw, endP = endRaw
+    if (startRaw > 24) {
+      const periodMap = [0, 645, 730, 815, 920, 1005, 1055, 1230, 1315, 1400, 1505, 1550, 1640]
+      for (let i = 1; i < periodMap.length; i++) {
+        if (startRaw >= periodMap[i] && (!startP || startRaw < periodMap[startP])) startP = i
+        if (endRaw >= periodMap[i] && (!endP || endRaw < periodMap[endP])) endP = i
+      }
+      if (startP > endP) { const t = startP; startP = endP; endP = t }
+    } else {
+      const shiftOffset = shift === 'Chiều' ? 6 : 0
+      startP = startRaw + shiftOffset
+      endP = endRaw + shiftOffset
+    }
+    if (startP < 1 || endP < startP || startP > 12 || endP > 12) continue
 
     sessions.push({
       buoiSo: Number(r[COL.BUOI_SO]) || 0,
