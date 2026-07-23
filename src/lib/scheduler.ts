@@ -28,35 +28,23 @@ export function findAllSchedules(
   const results: ScheduleResult[] = []
   const seen = new Set<string>()
 
-  const sorted = [...courseOptions]
-    .map((options, idx) => ({
-      idx,
-      options: [...options].sort((a, b) => {
-        const ca = [...courseOptions].flat().filter(o => {
-          for (const sa of a) for (const sb of o) if (sa.day === sb.day && sa.startPeriod <= sb.endPeriod && sb.startPeriod <= sa.endPeriod) return true
-          return false
-        }).length
-        const cb = [...courseOptions].flat().filter(o => {
-          for (const sa of b) for (const sb of o) if (sa.day === sb.day && sa.startPeriod <= sb.endPeriod && sb.startPeriod <= sa.endPeriod) return true
-          return false
-        }).length
-        return ca - cb
-      })
-    }))
-    .sort((a, b) => a.options.length - b.options.length)
+  const ordered = [...courseOptions].sort((a, b) => a.length - b.length)
 
-  const ordered = sorted.map(s => s.options)
-
-  let checked = 0
-  const total = ordered.reduce((a, o) => a * o.length, 1)
+  const MAX_ITER = 500000
+  let iterations = 0
+  const startTime = Date.now()
+  const TIME_LIMIT = 4000
 
   function scheduleKey(sessions: ClassSession[]): string {
     return sessions.map(s => `${s.courseCode}|${s.day}|${s.startPeriod}|${s.endPeriod}`).sort().join(',')
   }
 
   function backtrack(idx: number, current: ClassSession[]) {
-    if (results.length >= 500) return
-    if (++checked % 10000 === 0) onProgress?.(Math.round(checked / total * 100))
+    if (results.length >= 100) return
+    if (iterations++ > MAX_ITER) return
+    if (Date.now() - startTime > TIME_LIMIT) return
+    if (iterations % 50000 === 0) onProgress?.(Math.min(99, Math.round(iterations / MAX_ITER * 100)))
+
     if (idx === ordered.length) {
       const key = scheduleKey(current)
       if (seen.has(key)) return
@@ -104,6 +92,7 @@ export function findAllSchedules(
   }
 
   backtrack(0, [])
+  onProgress?.(100)
   return results.sort((a, b) => b.score - a.score)
 }
 
