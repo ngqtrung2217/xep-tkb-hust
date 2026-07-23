@@ -776,10 +776,10 @@ export default function Home() {
               return (
                 <div key={s.maLop} className="space-y-0.5">
                   <div className="flex items-center gap-2 font-semibold">
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: c }} />
+                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: c }} />
                     <span style={{ color: c }}>{s.courseCode}</span>
                     <span className="text-gray-300 font-normal">{s.maLop}</span>
-                    <span className="text-gray-500 font-normal">{s.classType}</span>
+                    <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded ${s.classType === 'TN' ? 'bg-purple-800 text-purple-200' : s.classType === 'BT' ? 'bg-green-800 text-green-200' : s.classType === 'LT' ? 'bg-blue-800 text-blue-200' : 'bg-gray-700 text-gray-300'}`}>{s.classType}</span>
                   </div>
                   <div className="text-gray-300 ml-5">{course?.name || s.courseName}</div>
                   <div className="text-gray-400 ml-5 flex gap-3">
