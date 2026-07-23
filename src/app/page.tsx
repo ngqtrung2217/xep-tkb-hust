@@ -239,7 +239,7 @@ export default function Home() {
 
       const ltByMaLop = new Map<string, ClassSession[]>()
       for (const s of lt) {
-        const key = s.maLopKem && s.maLopKem !== s.maLop ? s.maLopKem : s.maLop
+        const key = s.maLopKem && s.maLopKem !== s.maLop && s.maLopKem !== 'NULL' ? s.maLopKem : s.maLop
         if (!ltByMaLop.has(key)) ltByMaLop.set(key, [])
         ltByMaLop.get(key)!.push(s)
       }
