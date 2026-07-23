@@ -8,7 +8,7 @@ import * as XLSX from 'xlsx'
 import {
   Upload, Search, Plus, X, Calendar, SlidersHorizontal,
   ChevronLeft, ChevronRight, Save, Download, Sparkles, Flame,
-  CheckCircle2, Table2, ListOrdered, CircleHelp, Eye, EyeOff, ChevronDown, Loader2, Copy
+  CheckCircle2, Table2, ListOrdered, CircleHelp, Eye, EyeOff, ChevronDown, Loader2, Copy, Pin, PinOff
 } from 'lucide-react'
 
 const DAY_OFF_LABELS: [string, boolean][] = [
@@ -66,9 +66,14 @@ export default function Home() {
   const [toast, setToast] = useState<{ msg: string; suggestion?: string } | null>(null)
   const [heatmapFilter, setHeatmapFilter] = useState('')
   const [copied, setCopied] = useState('')
+  const [pinned, setPinned] = useState<Set<string>>(new Set())
 
   const copyText = (text: string) => {
     navigator.clipboard.writeText(text).then(() => { setCopied(text); setTimeout(() => setCopied(''), 1500) })
+  }
+
+  const togglePin = (key: string) => {
+    setPinned(prev => { const n = new Set(prev); if (n.has(key)) n.delete(key); else n.add(key); return n })
   }
 
   useEffect(() => { try { localStorage.removeItem('tkb_results') } catch {} }, [])
@@ -232,8 +237,12 @@ export default function Home() {
       if (tnList.length > 0) sessionsPerCourse.push(tnList)
     }
     if (sessionsPerCourse.some(s => s.length === 0)) return
+      const filtered = sessionsPerCourse.map(options => {
+        const pinKey = options.find(g => pinned.has(g[0].maLop))
+        return pinKey ? [pinKey] : options
+      })
       const prefs: UserPreferences = { dayOff, minimizeDays, minimizeGaps, preferredSlots: [...brushSelect], weekAware }
-      const results = findAllSchedules(sessionsPerCourse, prefs, excludedSessions, setSchedProgress)
+      const results = findAllSchedules(filtered, prefs, excludedSessions, setSchedProgress)
       if (results.length === 0) {
         const blockedDays = DAY_OFF_LABELS.filter((_, i) => dayOff[i]).map(([l]) => l)
         let suggestion = ''
@@ -438,12 +447,13 @@ export default function Home() {
                           return (
                             <div key={s.maLop}
                               onClick={() => toggleExclude(s.maLop)}
-                              className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg cursor-pointer transition ${isBlocked ? 'bg-red-50 line-through text-red-400' : matched ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-100 border border-transparent'}`}>
-                              <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${isBlocked ? 'bg-red-300' : matched ? 'bg-blue-500' : 'bg-gray-300'}`} />
-                              <span className="font-medium">{s.maLop}</span>
-                              <span className="text-gray-500 truncate">{info}</span>
+                              className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg cursor-pointer transition ${isBlocked ? 'bg-red-50 line-through text-red-400' : matched ? 'bg-blue-50 border border-blue-200' : pinned.has(s.maLop) ? 'bg-yellow-50 border border-yellow-300' : 'hover:bg-gray-100 border border-transparent'}`}>
+                              <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${isBlocked ? 'bg-red-300' : matched ? 'bg-blue-500' : pinned.has(s.maLop) ? 'bg-yellow-500' : 'bg-gray-300'}`} />
+                              <span className="font-medium text-sm">{s.maLop}</span>
+                              <span className="text-gray-600 truncate">{info}</span>
                               {s.room && <span className="text-gray-400 flex-shrink-0">- {s.room}</span>}
-                              <span className="text-gray-400 text-[10px] flex-shrink-0">tuần {s.weeks}</span>
+                              <span className="text-gray-500 text-xs flex-shrink-0">{s.weeks}</span>
+                              <Pin onClick={e => { e.stopPropagation(); togglePin(s.maLop) }} className={`w-3.5 h-3.5 cursor-pointer ${pinned.has(s.maLop) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300 hover:text-gray-500'}`} />
                             </div>
                           )
                         })}
@@ -674,19 +684,24 @@ export default function Home() {
                                  {starts.length > 0 ? starts.map((s: ClassSession) => {
                                    const color = courseColors.get(s.courseCode) || '#888'
                                    return (
-                                     <div key={s.maLop} className="flex-1 text-[10px] leading-snug rounded px-1 py-0.5 flex flex-col"
-                                       style={{ backgroundColor: color + '18', borderTop: `2px solid ${color}` }}>
+                                      <div key={s.maLop} className="flex-1 text-xs leading-snug rounded px-1 py-0.5 flex flex-col"
+                                        style={{ backgroundColor: color + '18', borderTop: `2px solid ${color}` }}>
                                         <div className="font-semibold flex justify-between items-center" style={{ color }}>
-                                          <span className="text-xs">{s.courseCode}</span>
+                                          <span className="text-sm">{s.courseCode}</span>
                                           <div className="flex items-center gap-1">
-                                            <span className={`text-[9px] px-1 rounded font-medium ${s.classType === 'TN' ? 'bg-purple-100 text-purple-700' : s.classType === 'BT' ? 'bg-green-100 text-green-700' : s.classType === 'LT' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{s.classType}</span>
+                                            <span className={`text-[10px] px-1 rounded font-medium ${s.classType === 'TN' ? 'bg-purple-100 text-purple-700' : s.classType === 'BT' ? 'bg-green-100 text-green-700' : s.classType === 'LT' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{s.classType}</span>
                                             <span className="text-gray-500 flex items-center gap-0.5">
-                                              <span className="font-normal text-[10px]">{s.maLop}</span>
+                                              <span className="font-normal text-xs">{s.maLop}</span>
                                               <span className="cursor-pointer hover:text-blue-500" onClick={e => { e.stopPropagation(); copyText(s.maLop) }} title="Copy">
-                                                {copied === s.maLop ? <CheckCircle2 className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
+                                                {copied === s.maLop ? <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
                                               </span>
+                                              <Pin onClick={e => { e.stopPropagation(); togglePin(s.maLop) }} className={`w-3.5 h-3.5 cursor-pointer ${pinned.has(s.maLop) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300 hover:text-gray-500'}`} />
                                             </span>
                                           </div>
+                                        </div>
+                                        <div className="flex justify-between items-end flex-1 mt-0.5">
+                                          <span className="text-gray-500 text-xs">{s.room || ''}</span>
+                                          <span className="text-gray-600 text-[10px]">{s.weeks}</span>
                                        </div>
                                        <div className="flex justify-between items-end flex-1">
                                          <span className="text-gray-500">{s.room || ''}</span>
