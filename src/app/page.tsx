@@ -8,7 +8,7 @@ import * as XLSX from 'xlsx'
 import {
   Upload, Search, Plus, X, Calendar, SlidersHorizontal,
   ChevronLeft, ChevronRight, Save, Download, Sparkles, Flame,
-  CheckCircle2, Table2, ListOrdered, CircleHelp, Eye, EyeOff
+  CheckCircle2, Table2, ListOrdered, CircleHelp, Eye, EyeOff, ChevronDown
 } from 'lucide-react'
 
 const DAY_OFF_LABELS: [string, boolean][] = [
@@ -59,6 +59,7 @@ export default function Home() {
   const [heatHover, setHeatHover] = useState<{ day: number; period: number } | null>(null)
   const [hiddenCourses, setHiddenCourses] = useState<Set<string>>(new Set())
   const [showDayOff, setShowDayOff] = useState(true)
+  const [showOptions, setShowOptions] = useState(true)
 
   useEffect(() => {
     if (data) {
@@ -365,7 +366,7 @@ export default function Home() {
               <div className="text-sm font-medium text-gray-500 mb-2 flex items-center gap-1 cursor-pointer select-none"
                 onClick={() => setShowDayOff(!showDayOff)}>
                 <SlidersHorizontal className="w-4 h-4" /> Nghỉ buổi
-                <span className="ml-auto text-xs text-gray-400">{showDayOff ? '-' : '+'}</span>
+                <ChevronDown className={`w-4 h-4 ml-auto transition ${showDayOff ? '' : '-rotate-90'}`} />
               </div>
               {showDayOff && <div className="grid grid-cols-2 gap-1.5">
                 {DAY_OFF_LABELS.map(([label], i) => (
@@ -378,9 +379,12 @@ export default function Home() {
             </div>}
 
             {selectedCodes.length > 0 && <div className="px-4 py-3 border-b">
-              <div className="text-sm font-medium text-gray-500 mb-2 flex items-center gap-1">
+              <div className="text-sm font-medium text-gray-500 mb-2 flex items-center gap-1 cursor-pointer select-none"
+                onClick={() => setShowOptions(!showOptions)}>
                 <Sparkles className="w-4 h-4" /> Tuỳ chọn xếp
+                <ChevronDown className={`w-4 h-4 ml-auto transition ${showOptions ? '' : '-rotate-90'}`} />
               </div>
+              {showOptions && <>
               <label className="flex items-center gap-2 text-sm cursor-pointer mb-2">
                 <input type="checkbox" checked={minimizeDays} onChange={e => setMinimizeDays(e.target.checked)}
                   className="accent-blue-600 w-4 h-4" />
@@ -420,6 +424,7 @@ export default function Home() {
               <div className="text-xs text-gray-400 mt-1">
                 {brushSelect.size > 0 && <span className="text-blue-500">✓ Đã chọn {brushSelect.size} khung giờ yêu thích trên heatmap</span>}
               </div>
+            </>}
             </div>}
 
             <div className="p-4 mt-auto">
