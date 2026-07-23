@@ -785,9 +785,9 @@ export default function Home() {
                                            </span>
                                          </div>
                                        </div>
-                                        <div className="flex justify-between items-end flex-1 mt-0.5">
-                                          <span className="text-gray-500 text-xs">{s.room || ''} {s.note ? <span className="text-yellow-600">({s.note})</span> : ''}</span>
-                                          <span className="text-gray-600 text-[10px]">{s.weeks}</span>
+                                        <div className="flex justify-between items-end flex-1 mt-0.5 overflow-hidden">
+                                          <span className="text-gray-500 text-xs truncate min-w-0">{s.room || ''} {s.note ? <span className="text-yellow-600">({s.note})</span> : ''}</span>
+                                          <span className="text-gray-600 text-[10px] flex-shrink-0 ml-1">{s.weeks}</span>
                                        </div>
                                      </div>
                                    )
