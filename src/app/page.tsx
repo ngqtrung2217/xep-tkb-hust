@@ -776,9 +776,9 @@ export default function Home() {
                                            </span>
                                          </div>
                                        </div>
-                                       <div className="flex justify-between items-end flex-1 mt-0.5">
-                                         <span className="text-gray-500 text-xs">{s.room || ''}</span>
-                                         <span className="text-gray-600 text-[10px]">{s.weeks}</span>
+                                        <div className="flex justify-between items-end flex-1 mt-0.5">
+                                          <span className="text-gray-500 text-xs">{s.room || ''} {s.note ? <span className="text-yellow-600">({s.note})</span> : ''}</span>
+                                          <span className="text-gray-600 text-[10px]">{s.weeks}</span>
                                        </div>
                                      </div>
                                    )
@@ -843,6 +843,7 @@ export default function Home() {
                         <span className="text-gray-700 flex-1 min-w-0">{course?.name || s.courseName}</span>
                         <span className="text-gray-500 flex-shrink-0">{DAY_LABELS[s.day]} {s.timeStr}</span>
                         <span className="text-gray-500 flex-shrink-0">{s.room}</span>
+                        {s.note && <span className="text-yellow-600 text-xs flex-shrink-0">({s.note})</span>}
                         <span className="text-gray-600 font-medium flex-shrink-0">tuần {s.weeks}</span>
                       </div>
                     )
@@ -876,6 +877,7 @@ export default function Home() {
                     <span>{DAY_LABELS[s.day]} {s.timeStr}</span>
                     <span>{s.room}</span>
                     <span>tuần {s.weeks}</span>
+                    {s.note && <span className="text-yellow-300">({s.note})</span>}
                   </div>
                 </div>
               )
