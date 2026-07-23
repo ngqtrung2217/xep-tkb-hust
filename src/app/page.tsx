@@ -65,6 +65,7 @@ export default function Home() {
   const [scheduling, setScheduling] = useState(false)
   const [schedProgress, setSchedProgress] = useState(0)
   const [toast, setToast] = useState<{ msg: string; suggestion?: string } | null>(null)
+  const [guide, setGuide] = useState(false)
   const [heatmapFilter, setHeatmapFilter] = useState('')
   const [copied, setCopied] = useState('')
   const [pinned, setPinned] = useState<Set<string>>(() => new Set(loadJSON('tkb_pinned', [])))
@@ -383,6 +384,9 @@ export default function Home() {
           )}
           <button onClick={() => setMobileMenu(!mobileMenu)} className="sm:hidden p-2 text-gray-500">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+          </button>
+          <button onClick={() => setGuide(true)} className="p-1.5 text-gray-400 hover:text-blue-500 transition" title="Hướng dẫn">
+            <CircleHelp className="w-5 h-5" />
           </button>
         </div>
       </header>
@@ -876,6 +880,26 @@ export default function Home() {
                 </div>
               )
             })}
+          </div>
+        </div>
+      )}
+      {guide && (
+        <div className="fixed inset-0 z-[99999] bg-black/40 flex items-center justify-center p-4" onClick={() => setGuide(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto p-6 space-y-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-800">📖 Hướng dẫn</h2>
+              <button onClick={() => setGuide(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="space-y-3 text-sm text-gray-600 leading-relaxed">
+              <div><strong className="text-gray-800">1. Upload file</strong><br />Tải file Excel TKB từ thông báo đăng ký tín chỉ HUST. Kéo thả hoặc click để chọn.</div>
+              <div><strong className="text-gray-800">2. Chọn môn</strong><br />Gõ mã HP để tìm, hoặc paste danh sách. Click môn để xem từng lớp. 👁 để ẩn, 📌 để ghim.</div>
+              <div><strong className="text-gray-800">3. Nghỉ buổi / Tránh giờ</strong><br />Bật nghỉ buổi (sáng/chiều). Trên heatmap click ô → ✕ tránh giờ đó. Scheduler sẽ bỏ qua.</div>
+              <div><strong className="text-gray-800">4. Heatmap</strong><br />Mật độ lớp mở theo khung giờ. Hover xem chi tiết môn. Click pill để lọc theo môn.</div>
+              <div><strong className="text-gray-800">5. Tuỳ chọn xếp</strong><br />Ít ngày, ít cửa sổ trống, xếp chung giờ nếu khác tuần.</div>
+              <div><strong className="text-gray-800">6. Ghim lớp 📌</strong><br />Ghim → khi xếp lại lớp đó giữ nguyên. Block lớp (click) → gạch ngang, ko xếp.</div>
+              <div><strong className="text-gray-800">7. Kết quả</strong><br />◀ ▶ duyệt cách xếp. Copy mã lớp bằng 📋. Share để gửi bạn bè.</div>
+              <div><strong className="text-gray-800">8. Export ICS</strong><br />Xuất file .ics import vào Google Calendar.</div>
+            </div>
           </div>
         </div>
       )}
