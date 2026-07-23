@@ -770,13 +770,13 @@ export default function Home() {
                                  {starts.map(s => {
                                    const color = courseColors.get(s.courseCode) || '#888'
                                    return (
-                                     <div key={s.maLop} className="flex-1 text-xs leading-snug rounded px-1 py-0.5 flex flex-col"
-                                       style={{ backgroundColor: color + '18', borderTop: `2px solid ${color}` }}>
-                                       <div className="font-semibold flex justify-between items-center" style={{ color }}>
-                                         <span className="text-sm">{s.courseCode}</span>
-                                         <div className="flex items-center gap-1">
-                                           <span className={`text-[10px] px-1 rounded font-medium ${s.classType === 'TN' ? 'bg-purple-100 text-purple-700' : s.classType === 'BT' ? 'bg-green-100 text-green-700' : s.classType === 'LT' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{s.classType}</span>
-                                           <span className="text-gray-500 flex items-center gap-0.5">
+                                      <div key={s.maLop} className="flex-1 text-xs leading-snug rounded px-1 py-0.5 flex flex-col overflow-hidden"
+                                        style={{ backgroundColor: color + '18', borderTop: `2px solid ${color}` }}>
+                                        <div className="font-semibold flex justify-between items-center truncate" style={{ color }}>
+                                          <span className="text-sm truncate">{s.courseCode}</span>
+                                          <div className="flex items-center gap-1 flex-shrink-0">
+                                            <span className={`text-[10px] px-1 rounded font-medium ${s.classType === 'TN' ? 'bg-purple-100 text-purple-700' : s.classType === 'BT' ? 'bg-green-100 text-green-700' : s.classType === 'LT' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{s.classType}</span>
+                                            <span className="text-gray-500 flex items-center gap-0.5 flex-shrink-0">
                                              <span className="font-normal text-xs">{s.maLop}</span>
                                              <span className="cursor-pointer hover:text-blue-500" onClick={e => { e.stopPropagation(); copyText(s.maLop) }} title="Copy">
                                                {copied === s.maLop ? <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
