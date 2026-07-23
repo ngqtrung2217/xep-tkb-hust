@@ -769,17 +769,24 @@ export default function Home() {
       </div>
       {ttHover && (
         <div className="fixed z-[9999] pointer-events-none" style={{ left: ttHover.x, top: ttHover.y, transform: 'translate(-50%, -100%)' }}>
-          <div className="bg-gray-900 text-white text-xs rounded-xl shadow-2xl px-3 py-2 space-y-1">
+          <div className="bg-gray-900 text-white text-xs rounded-xl shadow-2xl px-3 py-2 space-y-2">
             {ttHover.sessions.map(s => {
               const c = courseColors.get(s.courseCode) || '#888'
+              const course = data?.courses.get(s.courseCode)
               return (
-                <div key={s.maLop} className="flex items-center gap-2 whitespace-nowrap">
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: c }} />
-                  <span className="font-semibold">{s.courseCode}</span>
-                  <span className="text-gray-300">{s.maLop}</span>
-                  <span className="text-gray-400">{s.classType}</span>
-                  <span className="text-gray-400">{s.room}</span>
-                  <span className="text-gray-500">tuần {s.weeks}</span>
+                <div key={s.maLop} className="space-y-0.5">
+                  <div className="flex items-center gap-2 font-semibold">
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: c }} />
+                    <span style={{ color: c }}>{s.courseCode}</span>
+                    <span className="text-gray-300 font-normal">{s.maLop}</span>
+                    <span className="text-gray-500 font-normal">{s.classType}</span>
+                  </div>
+                  <div className="text-gray-300 ml-5">{course?.name || s.courseName}</div>
+                  <div className="text-gray-400 ml-5 flex gap-3">
+                    <span>{DAY_LABELS[s.day]} {s.timeStr}</span>
+                    <span>{s.room}</span>
+                    <span>tuần {s.weeks}</span>
+                  </div>
                 </div>
               )
             })}
