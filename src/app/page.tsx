@@ -531,8 +531,9 @@ export default function Home() {
                               <Pin onClick={e => { e.stopPropagation(); togglePin(s.maLop) }} className={`w-3.5 h-3.5 cursor-pointer flex-shrink-0 ${pinned.has(s.maLop) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300 hover:text-gray-500'}`} />
                               </div>
                               {(s.note || s.programType) && <div className="flex items-center gap-2 pl-5 mt-0.5">
-                                {s.note && <span className="text-yellow-600 text-[10px] truncate max-w-[120px]" title={s.note}>{s.note}</span>}
-                                {s.programType && <span className="text-gray-400 text-[10px]">{s.programType}</span>}
+                                <span className="text-yellow-600 text-[10px] truncate max-w-[160px]" title={s.note}>{s.note}</span>
+                                <span className="flex-1" />
+                                <span className="text-gray-400 text-[10px] ml-auto">{s.programType}</span>
                               </div>}
                             </div>
                           )
