@@ -392,7 +392,7 @@ export default function Home() {
       </header>
       <div className="h-[calc(100vh-57px)] flex overflow-hidden">
 
-        <aside className={`w-96 bg-white border-r flex flex-col flex-shrink-0 overflow-hidden fixed sm:relative z-40 h-[calc(100vh-57px)] transition-transform ${mobileMenu ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'}`}>
+        <aside className={`w-[450px] bg-white border-r flex flex-col flex-shrink-0 overflow-hidden fixed sm:relative z-40 h-[calc(100vh-57px)] transition-transform ${mobileMenu ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'}`}>
           <div className="p-4 border-b"
             onDragOver={e => { e.preventDefault(); setDragging(true) }}
             onDragLeave={() => setDragging(false)}
@@ -506,7 +506,13 @@ export default function Home() {
                             placeholder="Tìm mã lớp, giờ, phòng..."
                             className="w-full border rounded pl-7 pr-2 py-1 text-[11px]" />
                         </div>
-                        {uniqueClasses.map(group => {
+                        {uniqueClasses.filter(group => {
+                          const s = group[0]
+                          const q = (classFilter.get(code) || '').toLowerCase()
+                          if (!q) return true
+                          const info = group.map(s => `${DAY_LABELS[s.day]} ${s.timeStr} ${s.room} ${s.note} ${s.programType} ${s.classType} ${s.weeks}`).join(' ').toLowerCase()
+                          return s.maLop.toLowerCase().includes(q) || info.includes(q)
+                        }).map(group => {
                           const s = group[0]
                           const isBlocked = excludedSessions.has(s.maLop)
                           const matched = currentResult?.sessions.find(x => x.maLop === s.maLop)
