@@ -586,7 +586,7 @@ export default function Home() {
                               style={{ backgroundColor: getHeatColor(val, maxHeat) }}>
                               {val > 0 && <span className="font-medium">{val}</span>}
                               {isHover && unique.length > 0 && (
-                                <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-xl whitespace-nowrap pointer-events-none">
+                                <div className="fixed z-[9999] bottom-4 left-1/2 -translate-x-1/2 px-4 py-3 bg-gray-900 text-white text-sm rounded-xl shadow-2xl pointer-events-none max-w-md">
                                   <div className="font-semibold text-sm mb-1">{DAY_LABELS[d]} - Tiết {p} ({PERIOD_TIME[p]})</div>
                                   <div className="text-gray-300 mb-1">Tổng số: <strong className="text-white">{val}</strong> lớp — <strong className="text-white">{unique.length}</strong> môn</div>
                                   <div className="space-y-0.5">
