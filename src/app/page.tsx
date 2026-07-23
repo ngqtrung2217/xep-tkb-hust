@@ -650,18 +650,25 @@ export default function Home() {
                            return (
                              <td key={d} className="border p-0.5 align-top" style={{ minHeight: 52 }}>
                                <div className="flex gap-0.5" style={{ minHeight: 48 }}>
-                               {starts.length > 0 ? starts.map((s: ClassSession) => {
-                                 const color = courseColors.get(s.courseCode) || '#888'
-                                 return (
-                                   <div key={s.maLop} className="flex-1 text-[10px] leading-snug rounded px-1 py-0.5 flex flex-col justify-center"
-                                     style={{ backgroundColor: color + '18', borderTop: `2px solid ${color}` }}>
-                                     <div className="font-semibold text-xs" style={{ color }}>{s.courseCode}</div>
-                                     <div className="text-gray-600">{s.maLop} <span className="text-gray-400 text-[9px]">{s.classType}</span></div>
-                                     <div className="text-gray-500">{s.room}</div>
-                                     <div className="text-gray-700 font-semibold">tuần {s.weeks}</div>
-                                   </div>
-                                 )
-                               }) : unique.length > 0 ? <div className="text-gray-300 text-[10px] p-1">tiếp</div> : null}
+                                {starts.length > 0 ? starts.map((s: ClassSession) => {
+                                  const color = courseColors.get(s.courseCode) || '#888'
+                                  return (
+                                    <div key={s.maLop} className="flex-1 text-[10px] leading-snug rounded px-1 py-0.5 flex flex-col justify-center"
+                                      style={{ backgroundColor: color + '18', borderTop: `2px solid ${color}` }}>
+                                      <div className="font-semibold text-xs" style={{ color }}>{s.courseCode}</div>
+                                      <div className="text-gray-600">{s.maLop} <span className="text-gray-400 text-[9px]">{s.classType}</span></div>
+                                      <div className="text-gray-500">{s.room}</div>
+                                      <div className="text-gray-700 font-semibold">tuần {s.weeks}</div>
+                                    </div>
+                                  )
+                                }) : unique.map((s: ClassSession) => {
+                                  const color = courseColors.get(s.courseCode) || '#888'
+                                  return (
+                                    <div key={s.maLop} className="flex-1 rounded"
+                                      style={{ backgroundColor: color + '10' }}>
+                                    </div>
+                                  )
+                                })}
                                </div>
                              </td>
                            )
