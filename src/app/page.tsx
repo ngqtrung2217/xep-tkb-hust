@@ -811,7 +811,6 @@ export default function Home() {
                   <span className="font-medium text-gray-700">#{selectedResult + 1}</span>
                   <span>📅 {currentResult.daysCount} ngày</span>
                   <span>⏱ {currentResult.gaps} cửa sổ trống</span>
-                  {currentResult.score !== undefined && <span className="text-gray-400 text-xs">(score: {currentResult.score})</span>}
                 </div>
                 <div className="text-xs text-gray-400">Còn <strong>{scheduleResults!.length - selectedResult - 1}</strong> cách xếp khác</div>
               </div>
