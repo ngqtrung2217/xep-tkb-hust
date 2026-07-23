@@ -520,16 +520,20 @@ export default function Home() {
                           return (
                             <div key={s.maLop}
                               onClick={() => toggleExclude(s.maLop)}
-                              className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg cursor-pointer transition ${isBlocked ? 'bg-red-50 line-through text-red-400' : matched ? 'bg-blue-50 border border-blue-200' : pinned.has(s.maLop) ? 'bg-yellow-50 border border-yellow-300' : 'hover:bg-gray-100 border border-transparent'}`}>
+                              className={`text-xs px-3 py-2 rounded-lg cursor-pointer transition ${isBlocked ? 'bg-red-50 line-through text-red-400' : matched ? 'bg-blue-50 border border-blue-200' : pinned.has(s.maLop) ? 'bg-yellow-50 border border-yellow-300' : 'hover:bg-gray-100 border border-transparent'}`}>
+                              <div className="flex items-center gap-2">
                               <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${isBlocked ? 'bg-red-300' : matched ? 'bg-blue-500' : pinned.has(s.maLop) ? 'bg-yellow-500' : 'bg-gray-300'}`} />
                               <span className="font-medium text-sm">{s.maLop}</span>
                               <span className={`text-[10px] px-1 rounded font-medium flex-shrink-0 ${s.classType === 'TN' ? 'bg-purple-100 text-purple-700' : s.classType === 'BT' ? 'bg-green-100 text-green-700' : s.classType === 'LT' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{s.classType}</span>
                               <span className="text-gray-600 truncate">{info}</span>
                               {s.room && <span className="text-gray-400 flex-shrink-0">- {s.room}</span>}
-                              {s.note && <span className="text-yellow-600 text-[10px] flex-shrink-0 truncate max-w-[80px]" title={s.note}>({s.note})</span>}
-                              {s.programType && <span className="text-gray-400 text-[10px] flex-shrink-0">{s.programType}</span>}
                               <span className="text-gray-500 text-xs flex-shrink-0">{s.weeks}</span>
-                              <Pin onClick={e => { e.stopPropagation(); togglePin(s.maLop) }} className={`w-3.5 h-3.5 cursor-pointer ${pinned.has(s.maLop) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300 hover:text-gray-500'}`} />
+                              <Pin onClick={e => { e.stopPropagation(); togglePin(s.maLop) }} className={`w-3.5 h-3.5 cursor-pointer flex-shrink-0 ${pinned.has(s.maLop) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300 hover:text-gray-500'}`} />
+                              </div>
+                              {(s.note || s.programType) && <div className="flex items-center gap-2 pl-5 mt-0.5">
+                                {s.note && <span className="text-yellow-600 text-[10px] truncate max-w-[120px]" title={s.note}>{s.note}</span>}
+                                {s.programType && <span className="text-gray-400 text-[10px]">{s.programType}</span>}
+                              </div>}
                             </div>
                           )
                         })}
