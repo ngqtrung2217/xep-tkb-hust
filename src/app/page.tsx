@@ -69,6 +69,7 @@ export default function Home() {
   const [heatmapFilter, setHeatmapFilter] = useState('')
   const [copied, setCopied] = useState('')
   const [pinned, setPinned] = useState<Set<string>>(() => new Set(loadJSON('tkb_pinned', [])))
+  const [noteFilter, setNoteFilter] = useState<Map<string, string>>(new Map())
   const [mobileMenu, setMobileMenu] = useState(false)
   const [shareLink, setShareLink] = useState('')
 
@@ -511,6 +512,8 @@ export default function Home() {
                         {uniqueClasses.filter(group => {
                           const s = group[0]
                           const q = (classFilter.get(code) || '').toLowerCase()
+                          const activeNote = noteFilter.get(code) || ''
+                          if (activeNote && s.note !== activeNote) return false
                           if (!q) return true
                           const info = group.map(s => `${DAY_LABELS[s.day]} ${s.timeStr} ${s.room} ${s.note} ${s.programType} ${s.classType} ${s.weeks}`).join(' ').toLowerCase()
                           return s.maLop.toLowerCase().includes(q) || info.includes(q)
