@@ -62,6 +62,7 @@ export default function Home() {
   const [showOptions, setShowOptions] = useState(true)
   const [scheduling, setScheduling] = useState(false)
   const [schedProgress, setSchedProgress] = useState(0)
+  const [toast, setToast] = useState<{ msg: string; suggestion?: string } | null>(null)
 
   useEffect(() => { try { localStorage.removeItem('tkb_results') } catch {} }, [])
 
@@ -224,6 +225,16 @@ export default function Home() {
     if (sessionsPerCourse.some(s => s.length === 0)) return
       const prefs: UserPreferences = { dayOff, minimizeDays, minimizeGaps, preferredSlots: [...brushSelect], weekAware }
       const results = findAllSchedules(sessionsPerCourse, prefs, excludedSessions, setSchedProgress)
+      if (results.length === 0) {
+        const blockedDays = DAY_OFF_LABELS.filter((_, i) => dayOff[i]).map(([l]) => l)
+        let suggestion = ''
+        if (blockedDays.length > 0) suggestion = 'Thử bỏ nghỉ các buổi: ' + blockedDays.slice(0, 6).join(', ')
+        else suggestion = 'Có thể các môn bị trùng lịch hoặc đã bị block hết lớp'
+        setToast({ msg: 'Không tìm thấy cách xếp nào!', suggestion })
+        setTimeout(() => setToast(null), 6000)
+      } else {
+        setToast(null)
+      }
       setScheduleResults(results); setSelectedResult(0)
       } catch (e) { console.error(e) }
       setScheduling(false)
@@ -271,6 +282,13 @@ export default function Home() {
   const currentResult = scheduleResults?.[selectedResult]
 
   return (
+      <>
+      {toast && (
+        <div className="fixed top-4 right-4 z-50 bg-red-50 border border-red-200 rounded-xl px-4 py-3 shadow-lg max-w-sm animate-slide-in">
+          <div className="font-semibold text-red-700 text-sm">{toast.msg}</div>
+          {toast.suggestion && <div className="text-red-600 text-xs mt-1">{toast.suggestion}</div>}
+        </div>
+      )}
       <div className="h-screen flex flex-col bg-gray-50">
       <header className="bg-white border-b px-6 py-4 flex items-center justify-between flex-shrink-0 shadow-sm">
         <h1 className="text-xl font-bold text-blue-600 flex items-center gap-2">
@@ -697,6 +715,7 @@ export default function Home() {
           </div>
         </main>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
