@@ -67,10 +67,34 @@ export default function Home() {
   const [heatmapFilter, setHeatmapFilter] = useState('')
   const [copied, setCopied] = useState('')
   const [pinned, setPinned] = useState<Set<string>>(() => new Set(loadJSON('tkb_pinned', [])))
+  const [mobileMenu, setMobileMenu] = useState(false)
+  const [shareLink, setShareLink] = useState('')
 
   const copyText = (text: string) => {
     navigator.clipboard.writeText(text).then(() => { setCopied(text); setTimeout(() => setCopied(''), 1500) })
   }
+
+  const shareTKB = () => {
+    const result = scheduleResults?.[selectedResult]
+    if (!result) return
+    const data = { c: selectedCodes, s: result.sessions.map(s => ({ m: s.maLop, c: s.courseCode })) }
+    const encoded = btoa(encodeURIComponent(JSON.stringify(data)))
+    const link = window.location.origin + window.location.pathname + '?share=' + encoded
+    setShareLink(link)
+    copyText(link)
+    setTimeout(() => setShareLink(''), 3000)
+  }
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const shared = params.get('share')
+    if (shared && data) {
+      try {
+        const decoded = JSON.parse(decodeURIComponent(atob(shared)))
+        if (decoded.c) setSelectedCodes(prev => [...new Set([...prev, ...decoded.c])])
+      } catch {}
+    }
+  }, [data])
 
   const togglePin = (key: string) => {
     setPinned(prev => { const n = new Set(prev); if (n.has(key)) n.delete(key); else n.add(key); return n })
@@ -314,20 +338,23 @@ export default function Home() {
         <h1 className="text-xl font-bold text-blue-600 flex items-center gap-2">
           <Calendar className="w-6 h-6" /> Xếp TKB HUST
           <a href="https://github.com/ngqtrung2217/xep-tkb-hust" target="_blank" rel="noopener"
-            className="text-xs font-normal text-gray-400 hover:text-blue-500 ml-1">GitHub</a>
+            className="text-xs font-normal text-gray-400 hover:text-blue-500 ml-1 hidden sm:inline">GitHub</a>
         </h1>
         <div className="flex items-center gap-3">
-          {!data && <span className="text-gray-400 text-sm">Upload file Excel để bắt đầu</span>}
-          {data && <span className="text-green-600 flex items-center gap-1 text-sm"><CheckCircle2 className="w-4 h-4" /> Đã tải {data.sessions.length} lớp</span>}
+          {!data && <span className="text-gray-400 text-sm hidden sm:block">Upload file Excel để bắt đầu</span>}
+          {data && <span className="text-green-600 items-center gap-1 text-sm hidden sm:flex"><CheckCircle2 className="w-4 h-4" /> Đã tải {data.sessions.length} lớp</span>}
           {data && (
             <button onClick={() => { setData(null); setSelectedCodes([]); setScheduleResults(null); setHeatmap(null); setParseError(null); localStorage.clear() }}
               className="text-red-500 hover:underline text-xs">Xoá dữ liệu</button>
           )}
+          <button onClick={() => setMobileMenu(!mobileMenu)} className="sm:hidden p-2 text-gray-500">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+          </button>
         </div>
       </header>
       <div className="h-[calc(100vh-57px)] flex overflow-hidden">
 
-        <aside className="w-96 bg-white border-r flex flex-col flex-shrink-0 overflow-hidden">
+        <aside className={`w-96 bg-white border-r flex flex-col flex-shrink-0 overflow-hidden fixed sm:relative z-40 h-[calc(100vh-57px)] transition-transform ${mobileMenu ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'}`}>
           <div className="p-4 border-b"
             onDragOver={e => { e.preventDefault(); setDragging(true) }}
             onDragLeave={() => setDragging(false)}
@@ -563,6 +590,10 @@ export default function Home() {
                 className="text-sm px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 flex items-center gap-1.5">
                 <Download className="w-4 h-4" /> ICS
               </button>
+              <button onClick={shareTKB}
+                className="text-sm px-3 py-1.5 bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 flex items-center gap-1.5">
+                <span className="text-xs font-bold">{shareLink ? '✓' : '🔗'}</span> Share
+              </button>
             </div>}
           </div>
 
@@ -786,6 +817,7 @@ export default function Home() {
         </main>
       </div>
       </div>
+      {mobileMenu && <div className="fixed inset-0 bg-black/30 z-30 sm:hidden" onClick={() => setMobileMenu(false)} />}
       {ttHover && (
         <div className="fixed z-[9999] pointer-events-none" style={{ left: ttHover.x, top: ttHover.y, transform: 'translate(-50%, -100%)' }}>
           <div className="bg-gray-900 text-white text-xs rounded-xl shadow-2xl px-3 py-2 space-y-2">
