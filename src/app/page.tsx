@@ -66,7 +66,7 @@ export default function Home() {
   const [toast, setToast] = useState<{ msg: string; suggestion?: string } | null>(null)
   const [heatmapFilter, setHeatmapFilter] = useState('')
   const [copied, setCopied] = useState('')
-  const [pinned, setPinned] = useState<Set<string>>(new Set())
+  const [pinned, setPinned] = useState<Set<string>>(() => new Set(loadJSON('tkb_pinned', [])))
 
   const copyText = (text: string) => {
     navigator.clipboard.writeText(text).then(() => { setCopied(text); setTimeout(() => setCopied(''), 1500) })
@@ -91,6 +91,8 @@ export default function Home() {
   useEffect(() => { try { localStorage.setItem('tkb_minDays', JSON.stringify(minimizeDays)) } catch {} }, [minimizeDays])
   useEffect(() => { try { localStorage.setItem('tkb_minGaps', JSON.stringify(minimizeGaps)) } catch {} }, [minimizeGaps])
   useEffect(() => { try { localStorage.setItem('tkb_weekAware', JSON.stringify(weekAware)) } catch {} }, [weekAware])
+  useEffect(() => { if (scheduleResults && pinned.size > 0) runScheduler() }, [pinned.size])
+  useEffect(() => { try { localStorage.setItem('tkb_pinned', JSON.stringify([...pinned])) } catch {} }, [pinned])
 
   useEffect(() => {
     if (data && selectedCodes.length > 0) {
