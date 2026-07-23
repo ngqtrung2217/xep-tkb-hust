@@ -63,6 +63,7 @@ export default function Home() {
   const [scheduling, setScheduling] = useState(false)
   const [schedProgress, setSchedProgress] = useState(0)
   const [toast, setToast] = useState<{ msg: string; suggestion?: string } | null>(null)
+  const [heatmapFilter, setHeatmapFilter] = useState('')
 
   useEffect(() => { try { localStorage.removeItem('tkb_results') } catch {} }, [])
 
@@ -149,10 +150,12 @@ export default function Home() {
     return s
   })()
 
+  const heatmapSessions = heatmapFilter ? visibleSessions.filter(s => s.courseCode === heatmapFilter) : visibleSessions
+
   useEffect(() => {
-    if (visibleSessions.length > 0) setHeatmap(buildHeatmap(visibleSessions))
+    if (heatmapSessions.length > 0) setHeatmap(buildHeatmap(heatmapSessions))
     else setHeatmap(null)
-  }, [visibleSessions.length])
+  }, [heatmapSessions.length])
 
   const runScheduler = () => {
     if (!data || selectedCodes.length === 0) return
@@ -555,9 +558,14 @@ export default function Home() {
             </div>}
 
             {data && viewMode === 'heatmap' && heatmap && <div>
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-2">
                 <Flame className="w-5 h-5 text-orange-500" />
                 <h3 className="text-base font-medium">Heatmap số lớp mở</h3>
+                <select className="ml-auto text-xs border rounded-lg px-2 py-1 bg-white" value={heatmapFilter}
+                  onChange={e => setHeatmapFilter(e.target.value)}>
+                  <option value="">Tất cả môn</option>
+                  {selectedCodes.map(code => <option key={code} value={code}>{code}</option>)}
+                </select>
               </div>
               <div className="overflow-auto border rounded-xl bg-white shadow-sm">
                 <table className="border-collapse w-full min-w-[700px] tkb-grid" style={{ tableLayout: 'fixed' }}>                  <thead>                    <tr>
@@ -647,31 +655,53 @@ export default function Home() {
                            if (sessions.length === 0) return <td key={d} className="border border-gray-50 p-0" style={{ minHeight: 52 }} />
                            const starts = sessions.filter((s: ClassSession) => s.startPeriod === p)
                            const unique = sessions.filter((s: ClassSession, i: number, arr: ClassSession[]) => i === arr.findIndex(x => x.maLop === s.maLop))
-                           return (
-                             <td key={d} className="border p-0.5 align-top" style={{ minHeight: 52 }}>
-                               <div className="flex gap-0.5" style={{ minHeight: 48 }}>
-                                {starts.length > 0 ? starts.map((s: ClassSession) => {
-                                  const color = courseColors.get(s.courseCode) || '#888'
-                                  return (
-                                    <div key={s.maLop} className="flex-1 text-[10px] leading-snug rounded px-1 py-0.5 flex flex-col justify-center"
-                                      style={{ backgroundColor: color + '18', borderTop: `2px solid ${color}` }}>
-                                      <div className="font-semibold text-xs" style={{ color }}>{s.courseCode}</div>
-                                      <div className="text-gray-600">{s.maLop} <span className="text-gray-400 text-[9px]">{s.classType}</span></div>
-                                      <div className="text-gray-500">{s.room}</div>
-                                      <div className="text-gray-700 font-semibold">tuần {s.weeks}</div>
-                                    </div>
-                                  )
-                                }) : unique.map((s: ClassSession) => {
-                                  const color = courseColors.get(s.courseCode) || '#888'
-                                  return (
-                                    <div key={s.maLop} className="flex-1 rounded"
-                                      style={{ backgroundColor: color + '10' }}>
-                                    </div>
-                                  )
-                                })}
-                               </div>
-                             </td>
-                           )
+                            return (
+                              <td key={d} className="border p-0.5 align-top relative" style={{ minHeight: 52 }}
+                                onMouseEnter={() => setHeatHover({ day: d, period: p })}
+                                onMouseLeave={() => setHeatHover(null)}>
+                                <div className="flex gap-0.5" style={{ minHeight: 48 }}>
+                                 {starts.length > 0 ? starts.map((s: ClassSession) => {
+                                   const color = courseColors.get(s.courseCode) || '#888'
+                                   return (
+                                     <div key={s.maLop} className="flex-1 text-[10px] leading-snug rounded px-1 py-0.5 flex flex-col"
+                                       style={{ backgroundColor: color + '18', borderTop: `2px solid ${color}` }}>
+                                       <div className="font-semibold text-xs flex justify-between" style={{ color }}>
+                                         <span>{s.courseCode}</span>
+                                         <span className="text-gray-500 font-normal text-[9px]">{s.maLop}</span>
+                                       </div>
+                                       <div className="flex justify-between items-end flex-1">
+                                         <span className="text-gray-500">{s.room || ''}</span>
+                                         <span className="text-gray-600 text-[9px]">tuần {s.weeks}</span>
+                                       </div>
+                                     </div>
+                                   )
+                                 }) : unique.map((s: ClassSession) => {
+                                   const color = courseColors.get(s.courseCode) || '#888'
+                                   return (
+                                     <div key={s.maLop} className="flex-1 rounded"
+                                       style={{ backgroundColor: color + '10' }}>
+                                     </div>
+                                   )
+                                 })}
+                                </div>
+                                {heatHover?.day === d && heatHover?.period === p && starts.length > 0 && (
+                                  <div className="fixed z-[9999] bottom-4 left-1/2 -translate-x-1/2 px-3 py-2 bg-gray-900 text-white text-xs rounded-xl shadow-2xl pointer-events-none max-w-sm">
+                                    {starts.map(s => {
+                                      const c = courseColors.get(s.courseCode) || '#888'
+                                      return (
+                                        <div key={s.maLop} className="flex items-center gap-2 mb-1 last:mb-0">
+                                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: c }} />
+                                          <span className="font-semibold">{s.courseCode}</span>
+                                          <span className="text-gray-400">{s.maLop}</span>
+                                          <span className="text-gray-400">{s.room}</span>
+                                          <span className="text-gray-500">tuần {s.weeks}</span>
+                                        </div>
+                                      )
+                                    })}
+                                  </div>
+                                )}
+                              </td>
+                            )
                          })}
                       </tr>
                     ))}
