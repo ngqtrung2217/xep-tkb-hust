@@ -803,8 +803,7 @@ export default function Home() {
                     className="text-sm px-3 py-1.5 bg-gray-100 rounded-lg disabled:opacity-30 hover:bg-gray-200"><ChevronRight className="w-4 h-4" /></button>
                 </div>
               </div>
-              {scheduleResults && <div className="flex items-center gap-3">
-                <h4 className="text-sm font-medium text-gray-600 mb-2">Chi tiết lớp đã xếp:</h4>
+              {scheduleResults && <div className="mt-3">
                 <div className="space-y-1.5">
                   {[...currentResult.sessions]
                     .sort((a: ClassSession, b: ClassSession) => a.day * 100 + a.startPeriod - (b.day * 100 + b.startPeriod))
@@ -812,15 +811,15 @@ export default function Home() {
                     const color = courseColors.get(s.courseCode) || '#888'
                     const course = data?.courses.get(s.courseCode)
                     return (
-                      <div key={i} className="text-sm flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border">
+                      <div key={i} className="text-sm bg-gray-50 rounded-lg px-3 py-2 border flex items-center gap-x-3 gap-y-1 flex-wrap">
                         <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
-                        <span className="font-medium w-24 flex-shrink-0">{s.courseCode}</span>
-                        <span className="font-mono text-xs text-gray-600 w-28 flex-shrink-0 cursor-pointer hover:text-blue-600"
-                          onClick={() => copyText(s.maLop)} title="Click để copy">{copied === s.maLop ? '✓' : s.maLop} <span className="text-gray-400">{s.classType}</span></span>
-                        <span className="text-gray-700 truncate flex-1 min-w-0">{course?.name || s.courseName}</span>
-                        <span className="text-gray-500 w-28 flex-shrink-0 text-right">{DAY_LABELS[s.day]} {s.timeStr}</span>
-                        <span className="text-gray-500 w-20 flex-shrink-0 text-right">{s.room}</span>
-                        <span className="text-gray-700 font-medium w-44 flex-shrink-0 text-right">tuần {s.weeks}</span>
+                        <span className="font-medium text-sm" style={{ color }}>{s.courseCode}</span>
+                        <span className="font-mono text-xs text-gray-600 cursor-pointer hover:text-blue-600 flex-shrink-0"
+                          onClick={() => copyText(s.maLop)} title="Copy">{copied === s.maLop ? '✓' : s.maLop} <span className="text-gray-400">{s.classType}</span></span>
+                        <span className="text-gray-700 flex-1 min-w-0">{course?.name || s.courseName}</span>
+                        <span className="text-gray-500 flex-shrink-0">{DAY_LABELS[s.day]} {s.timeStr}</span>
+                        <span className="text-gray-500 flex-shrink-0">{s.room}</span>
+                        <span className="text-gray-600 font-medium flex-shrink-0">tuần {s.weeks}</span>
                       </div>
                     )
                   })}
