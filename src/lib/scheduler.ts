@@ -52,7 +52,7 @@ function scoreSchedule(
 }
 
 export function findAllSchedules(
-  courseSessions: ClassSession[][],
+  courseOptions: ClassSession[][][],
   prefs: UserPreferences,
   excluded: Set<string>
 ): ScheduleResult[] {
@@ -68,7 +68,7 @@ export function findAllSchedules(
 
   function backtrack(idx: number, current: ClassSession[]) {
     if (results.length >= 500) return
-    if (idx === courseSessions.length) {
+    if (idx === courseOptions.length) {
       const key = scheduleKey(current)
       if (seen.has(key)) return
       seen.add(key)
@@ -77,23 +77,24 @@ export function findAllSchedules(
       return
     }
 
-    for (const session of courseSessions[idx]) {
-      if (excluded.has(session.maLop)) continue
+    for (const group of courseOptions[idx]) {
+      if (excluded.has(group[0].maLop)) continue
 
-      let blocked = false
-      for (let p = session.startPeriod; p <= session.endPeriod; p++) {
-        if (isDayBlocked(session.day, p, prefs.dayOff)) { blocked = true; break }
+      let blocked = false, conflict = false
+      for (const session of group) {
+        for (let p = session.startPeriod; p <= session.endPeriod; p++) {
+          if (isDayBlocked(session.day, p, prefs.dayOff)) { blocked = true; break }
+        }
+        if (blocked) break
+        for (const existing of current) {
+          if (sessionsOverlap(session, existing, prefs.weekAware)) { conflict = true; break }
+        }
+        if (conflict) break
       }
-      if (blocked) continue
-
-      let conflict = false
-      for (const existing of current) {
-        if (sessionsOverlap(session, existing, prefs.weekAware)) { conflict = true; break }
-      }
-      if (!conflict) {
-        current.push(session)
+      if (!blocked && !conflict) {
+        current.push(...group)
         backtrack(idx + 1, current)
-        current.pop()
+        for (let i = 0; i < group.length; i++) current.pop()
       }
     }
   }

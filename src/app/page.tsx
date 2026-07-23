@@ -58,6 +58,7 @@ export default function Home() {
   const [tooltip, setTooltip] = useState<string | null>(null)
   const [heatHover, setHeatHover] = useState<{ day: number; period: number } | null>(null)
   const [hiddenCourses, setHiddenCourses] = useState<Set<string>>(new Set())
+  const [showDayOff, setShowDayOff] = useState(true)
 
   useEffect(() => {
     if (data) {
@@ -149,10 +150,15 @@ export default function Home() {
     if (!data || selectedCodes.length === 0) return
     const activeCodes = selectedCodes.filter(code => !hiddenCourses.has(code))
     if (activeCodes.length === 0) return
-    const sessionsPerCourse = activeCodes.map(code =>
-      data.sessions.filter(s => s.courseCode === code)
-        .filter(s => programFilter === 'all' || s.programType === programFilter)
-    )
+    const sessionsPerCourse = activeCodes.map(code => {
+      const byKey = new Map<string, ClassSession[]>()
+      for (const s of data.sessions.filter(s => s.courseCode === code).filter(s => programFilter === 'all' || s.programType === programFilter)) {
+        const key = s.maLopKem && s.maLopKem !== s.maLop ? s.maLopKem : s.maLop
+        if (!byKey.has(key)) byKey.set(key, [])
+        byKey.get(key)!.push(s)
+      }
+      return [...byKey.values()]
+    })
     if (sessionsPerCourse.some(s => s.length === 0)) return
     const prefs: UserPreferences = { dayOff, minimizeDays, minimizeGaps, preferredSlots: [...brushSelect], weekAware }
     const results = findAllSchedules(sessionsPerCourse, prefs, excludedSessions)
@@ -301,7 +307,13 @@ export default function Home() {
                   const color = courseColors.get(code) || '#888'
                   const sessions = data.sessions.filter(s => s.courseCode === code)
                   const isExpanded = expandedCourse === code
-                  const uniqueClasses = sessions.filter((s, i, arr) => i === arr.findIndex(x => x.maLop === s.maLop))
+                  const byKey = new Map<string, ClassSession[]>()
+                  for (const s of sessions) {
+                    const key = s.maLopKem && s.maLopKem !== s.maLop ? s.maLopKem : s.maLop
+                    if (!byKey.has(key)) byKey.set(key, [])
+                    byKey.get(key)!.push(s)
+                  }
+                  const uniqueClasses = [...byKey.values()]
                   return (
                     <div key={code} className="bg-gray-50 rounded-lg border">
                       <div className="flex items-center gap-2 px-3 py-2.5 cursor-pointer"
@@ -325,18 +337,20 @@ export default function Home() {
                             placeholder="Tìm mã lớp, giờ, phòng..."
                             className="w-full border rounded pl-7 pr-2 py-1 text-[11px]" />
                         </div>
-                        {uniqueClasses.map(s => {
+                        {uniqueClasses.map(group => {
+                          const s = group[0]
                           const isBlocked = excludedSessions.has(s.maLop)
                           const matched = currentResult?.sessions.find(x => x.maLop === s.maLop)
+                          const info = group.map(s => `${DAY_LABELS[s.day]} ${s.timeStr}`).join(', ')
                           return (
                             <div key={s.maLop}
                               onClick={() => toggleExclude(s.maLop)}
                               className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg cursor-pointer transition ${isBlocked ? 'bg-red-50 line-through text-red-400' : matched ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-100 border border-transparent'}`}>
                               <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${isBlocked ? 'bg-red-300' : matched ? 'bg-blue-500' : 'bg-gray-300'}`} />
                               <span className="font-medium">{s.maLop}</span>
-                              <span className="text-gray-500">{DAY_LABELS[s.day]} {s.timeStr}</span>
-                              {s.room && <span className="text-gray-400">- {s.room}</span>}
-                              <span className="text-gray-300 text-[10px]">{s.weeks}</span>
+                              <span className="text-gray-500 truncate">{info}</span>
+                              {s.room && <span className="text-gray-400 flex-shrink-0">- {s.room}</span>}
+                              <span className="text-gray-400 text-[10px] flex-shrink-0">tuần {s.weeks}</span>
                             </div>
                           )
                         })}
@@ -348,17 +362,19 @@ export default function Home() {
             </div>}
 
             {selectedCodes.length > 0 && <div className="px-4 py-3 border-b">
-              <div className="text-sm font-medium text-gray-500 mb-2 flex items-center gap-1">
+              <div className="text-sm font-medium text-gray-500 mb-2 flex items-center gap-1 cursor-pointer select-none"
+                onClick={() => setShowDayOff(!showDayOff)}>
                 <SlidersHorizontal className="w-4 h-4" /> Nghỉ buổi
+                <span className="ml-auto text-xs text-gray-400">{showDayOff ? '-' : '+'}</span>
               </div>
-              <div className="grid grid-cols-2 gap-1.5">
+              {showDayOff && <div className="grid grid-cols-2 gap-1.5">
                 {DAY_OFF_LABELS.map(([label], i) => (
                   <button key={i} onClick={() => toggleDayOff(i)}
                     className={`text-xs px-2 py-1.5 rounded-lg border transition ${dayOff[i] ? 'bg-red-50 border-red-200 text-red-600' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
                     {label}
                   </button>
                 ))}
-              </div>
+              </div>}
             </div>}
 
             {selectedCodes.length > 0 && <div className="px-4 py-3 border-b">
