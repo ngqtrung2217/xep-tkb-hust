@@ -8,7 +8,7 @@ import * as XLSX from 'xlsx'
 import {
   Upload, Search, Plus, X, Calendar, SlidersHorizontal,
   ChevronLeft, ChevronRight, Save, Download, Sparkles, Flame,
-  CheckCircle2, Table2, ListOrdered, CircleHelp, Eye, EyeOff, ChevronDown, Loader2, Copy, Pin, PinOff, Share2
+  CheckCircle2, Table2, ListOrdered, CircleHelp, Eye, EyeOff, ChevronDown, Loader2, Copy, Pin, PinOff, Share2, BookOpen
 } from 'lucide-react'
 
 const DAY_OFF_LABELS: [string, boolean][] = [
@@ -887,7 +887,7 @@ export default function Home() {
         <div className="fixed inset-0 z-[99999] bg-black/40 flex items-center justify-center p-4" onClick={() => setGuide(false)}>
           <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto p-6 space-y-4" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-gray-800">📖 Hướng dẫn</h2>
+              <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2"><BookOpen className="w-5 h-5" /> Hướng dẫn</h2>
               <button onClick={() => setGuide(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
             </div>
             <div className="space-y-3 text-sm text-gray-600 leading-relaxed">
