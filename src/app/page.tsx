@@ -704,12 +704,8 @@ export default function Home() {
                                         <div className="flex justify-between items-end flex-1 mt-0.5">
                                           <span className="text-gray-500 text-xs">{s.room || ''}</span>
                                           <span className="text-gray-600 text-[10px]">{s.weeks}</span>
-                                       </div>
-                                       <div className="flex justify-between items-end flex-1">
-                                         <span className="text-gray-500">{s.room || ''}</span>
-                                         <span className="text-gray-600 text-[9px]">tuần {s.weeks}</span>
-                                       </div>
-                                     </div>
+                                        </div>
+                                      </div>
                                    )
                                  }) : unique.map((s: ClassSession) => {
                                    const color = courseColors.get(s.courseCode) || '#888'
