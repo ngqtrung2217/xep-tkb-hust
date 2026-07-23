@@ -520,7 +520,7 @@ export default function Home() {
                               <span className={`text-[10px] px-1 rounded font-medium flex-shrink-0 ${s.classType === 'TN' ? 'bg-purple-100 text-purple-700' : s.classType === 'BT' ? 'bg-green-100 text-green-700' : s.classType === 'LT' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{s.classType}</span>
                               <span className="text-gray-600 truncate">{info}</span>
                               {s.room && <span className="text-gray-400 flex-shrink-0">- {s.room}</span>}
-                              {s.note && <span className="text-yellow-600 text-[10px] flex-shrink-0">({s.note.substring(0, 20)})</span>}
+                              {s.note && <span className="text-yellow-600 text-[10px] flex-shrink-0 truncate max-w-[80px]" title={s.note}>({s.note})</span>}
                               {s.programType && <span className="text-gray-400 text-[10px] flex-shrink-0">{s.programType}</span>}
                               <span className="text-gray-500 text-xs flex-shrink-0">{s.weeks}</span>
                               <Pin onClick={e => { e.stopPropagation(); togglePin(s.maLop) }} className={`w-3.5 h-3.5 cursor-pointer ${pinned.has(s.maLop) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300 hover:text-gray-500'}`} />
@@ -846,7 +846,7 @@ export default function Home() {
                         <span className="text-gray-700 flex-1 min-w-0">{course?.name || s.courseName}</span>
                         <span className="text-gray-500 flex-shrink-0">{DAY_LABELS[s.day]} {s.timeStr}</span>
                         <span className="text-gray-500 flex-shrink-0">{s.room}</span>
-                        {s.note && <span className="text-yellow-600 text-xs flex-shrink-0">({s.note})</span>}
+                        {s.note && <span className="text-yellow-600 text-xs flex-shrink-0 truncate max-w-[100px]" title={s.note}>({s.note})</span>}
                         <span className="text-gray-600 font-medium flex-shrink-0">tuần {s.weeks}</span>
                       </div>
                     )
