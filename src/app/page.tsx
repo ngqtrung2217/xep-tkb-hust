@@ -372,12 +372,7 @@ export default function Home() {
 
   return (
       <>
-      {toast && (
-        <div className="fixed top-4 right-4 z-50 bg-red-50 border border-red-200 rounded-xl px-4 py-3 shadow-lg max-w-sm animate-slide-in">
-          <div className="font-semibold text-red-700 text-sm">{toast.msg}</div>
-          {toast.suggestion && <div className="text-red-600 text-xs mt-1">{toast.suggestion}</div>}
-        </div>
-      )}
+      {toast && <div className="fixed top-4 right-4 z-50 bg-red-50 border border-red-200 rounded-xl px-4 py-3 shadow-lg max-w-sm">{toast.msg}</div>}
       <div className="h-screen flex flex-col bg-gray-50">
       <header className="bg-white border-b px-6 py-4 flex items-center justify-between flex-shrink-0 shadow-sm">
         <h1 className="text-xl font-bold text-blue-600 flex items-center gap-2">
@@ -626,7 +621,7 @@ export default function Home() {
           </>}
         </aside>
 
-        <main className="flex-1 flex flex-col overflow-hidden" style={{ height: 'calc(100vh - 57px)' }}>
+        <div className="flex-1 flex flex-col overflow-hidden" style={{ height: 'calc(100vh - 57px)' }}>
           <div className="flex items-center justify-between px-6 py-3 bg-white border-b">
             <div className="flex items-center gap-2">
               {[
@@ -871,15 +866,14 @@ export default function Home() {
                   })}
                 </div>
               </div>}
-
+            </div>}
 
           </div>
-        </main>
+        </div>
       </div>
       </div>
-      {mobileMenu && <div className="fixed inset-0 bg-black/30 z-30 sm:hidden" onClick={() => setMobileMenu(false)} />}
-      {ttHover && (
-        <div className="fixed z-[9999] pointer-events-none" style={{ left: ttHover.x, top: ttHover.y, transform: 'translate(-50%, -100%)' }}>
+      {mobileMenu && <div className="fixed inset-0 z-30 sm:hidden" onClick={() => setMobileMenu(false)} />}
+      {ttHover && <div className="fixed z-[9999] pointer-events-none" style={{ left: ttHover.x, top: ttHover.y, transform: 'translate(-50%, -100%)' }}>
           <div className="bg-gray-900 text-white text-xs rounded-xl shadow-2xl px-3 py-2 space-y-2">
             {ttHover.sessions.map(s => {
               const c = courseColors.get(s.courseCode) || '#888'
@@ -903,10 +897,9 @@ export default function Home() {
               )
             })}
           </div>
-        </div>
-      )}
+        </div>}
       {guide && (
-        <div className="fixed inset-0 z-[99999] bg-black/40 flex items-center justify-center p-4" onClick={() => setGuide(false)}>
+        <div className="fixed inset-0 z-[99999] bg-black bg-opacity-40 flex items-center justify-center p-4" onClick={() => setGuide(false)}>
           <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto p-6 space-y-4" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2"><BookOpen className="w-5 h-5" /> Hướng dẫn</h2>
