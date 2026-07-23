@@ -162,6 +162,7 @@ export default function Home() {
     setScheduleResults(null)
 
     setTimeout(() => {
+      try {
       const sessionsPerCourse: ClassSession[][][] = []
     for (const code of activeCodes) {
       const all = data.sessions.filter(s => s.courseCode === code).filter(s => programFilter === 'all' || s.programType === programFilter)
@@ -221,11 +222,12 @@ export default function Home() {
       if (tnList.length > 0) sessionsPerCourse.push(tnList)
     }
     if (sessionsPerCourse.some(s => s.length === 0)) return
-    const prefs: UserPreferences = { dayOff, minimizeDays, minimizeGaps, preferredSlots: [...brushSelect], weekAware }
+      const prefs: UserPreferences = { dayOff, minimizeDays, minimizeGaps, preferredSlots: [...brushSelect], weekAware }
       const results = findAllSchedules(sessionsPerCourse, prefs, excludedSessions, setSchedProgress)
       setScheduleResults(results); setSelectedResult(0)
+      } catch (e) { console.error(e) }
       setScheduling(false)
-    }, 50)
+    }, 0)
   }
 
   const toggleDayOff = (idx: number) => {
