@@ -42,7 +42,7 @@ export function parseExcelData(data: any[][]): { courses: Map<string, Course>; s
       for (let i = 1; i < periodMap.length; i++) {
         const ps = hhmm(periodMap[i])
         const pe = i < periodMap.length - 1 ? hhmm(periodMap[i + 1]) : 9999
-        if (s < pe && e > ps) {
+        if (s < pe && e >= ps) {
           if (startP === 0) startP = i
           endP = i
         }
