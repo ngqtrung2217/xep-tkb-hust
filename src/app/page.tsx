@@ -61,6 +61,8 @@ export default function Home() {
   const [showDayOff, setShowDayOff] = useState(true)
   const [showOptions, setShowOptions] = useState(true)
 
+  useEffect(() => { try { localStorage.removeItem('tkb_results') } catch {} }, [])
+
   useEffect(() => {
     if (data) {
       const obj: any = { courses: {}, sessions: data.sessions }
@@ -94,6 +96,8 @@ export default function Home() {
       if (rows.length < 5) { setParseError('File không đúng định dạng TKB HUST'); return }
       const parsed = parseExcelData(rows)
       if (parsed.courses.size === 0) { setParseError('Không tìm thấy dữ liệu lớp học'); return }
+      localStorage.removeItem('tkb_results')
+      setScheduleResults(null)
       setData(parsed)
       setScheduleResults(null)
       setSelectedCodes([])
