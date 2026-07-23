@@ -479,13 +479,12 @@ export default function Home() {
                   const color = courseColors.get(code) || '#888'
                   const sessions = data.sessions.filter(s => s.courseCode === code)
                   const isExpanded = expandedCourse === code
-                  const byKey = new Map<string, ClassSession[]>()
+                  const byMaLop = new Map<string, ClassSession[]>()
                   for (const s of sessions) {
-                    const key = s.maLopKem && s.maLopKem !== s.maLop ? s.maLopKem : s.maLop
-                    if (!byKey.has(key)) byKey.set(key, [])
-                    byKey.get(key)!.push(s)
+                    if (!byMaLop.has(s.maLop)) byMaLop.set(s.maLop, [])
+                    byMaLop.get(s.maLop)!.push(s)
                   }
-                  const uniqueClasses = [...byKey.values()]
+                  const uniqueClasses = [...byMaLop.values()]
                   return (
                     <div key={code} className="bg-gray-50 rounded-lg border">
                       <div className="flex items-center gap-2 px-3 py-2.5 cursor-pointer"
