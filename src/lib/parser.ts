@@ -34,14 +34,19 @@ export function parseExcelData(data: any[][]): { courses: Map<string, Course>; s
     const startRaw = Number(r[COL.BD]) || 0
     const endRaw = Number(r[COL.KT]) || 0
     const shift = String(r[COL.KIP] || '').trim()
-    let startP = startRaw, endP = endRaw
+    let startP = 0, endP = 0
     if (startRaw > 24) {
       const periodMap = [0, 645, 730, 815, 920, 1005, 1055, 1230, 1315, 1400, 1505, 1550, 1640]
+      const hhmm = (v: number) => Math.floor(v / 100) * 60 + (v % 100)
+      const s = hhmm(startRaw), e = hhmm(endRaw)
       for (let i = 1; i < periodMap.length; i++) {
-        if (startRaw >= periodMap[i] && (!startP || startRaw < periodMap[startP])) startP = i
-        if (endRaw >= periodMap[i] && (!endP || endRaw < periodMap[endP])) endP = i
+        const ps = hhmm(periodMap[i])
+        const pe = i < periodMap.length - 1 ? hhmm(periodMap[i + 1]) : 9999
+        if (s < pe && e > ps) {
+          if (startP === 0) startP = i
+          endP = i
+        }
       }
-      if (startP > endP) { const t = startP; startP = endP; endP = t }
     } else {
       const shiftOffset = shift === 'Chiều' ? 6 : 0
       startP = startRaw + shiftOffset
