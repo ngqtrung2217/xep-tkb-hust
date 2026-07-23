@@ -8,7 +8,7 @@ import * as XLSX from 'xlsx'
 import {
   Upload, Search, Plus, X, Calendar, SlidersHorizontal,
   ChevronLeft, ChevronRight, Save, Download, Sparkles, Flame,
-  CheckCircle2, Table2, ListOrdered, CircleHelp, Eye, EyeOff, ChevronDown, Loader2
+  CheckCircle2, Table2, ListOrdered, CircleHelp, Eye, EyeOff, ChevronDown, Loader2, Copy
 } from 'lucide-react'
 
 const DAY_OFF_LABELS: [string, boolean][] = [
@@ -676,13 +676,16 @@ export default function Home() {
                                    return (
                                      <div key={s.maLop} className="flex-1 text-[10px] leading-snug rounded px-1 py-0.5 flex flex-col"
                                        style={{ backgroundColor: color + '18', borderTop: `2px solid ${color}` }}>
-                                        <div className="font-semibold text-xs flex justify-between" style={{ color }}>
-                                          <span>{s.courseCode}</span>
+                                        <div className="font-semibold flex justify-between items-center" style={{ color }}>
+                                          <span className="text-xs">{s.courseCode}</span>
                                           <div className="flex items-center gap-1">
-                                            <span className={`text-[8px] px-1 rounded font-medium ${s.classType === 'TN' ? 'bg-purple-100 text-purple-700' : s.classType === 'BT' ? 'bg-green-100 text-green-700' : s.classType === 'LT' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{s.classType}</span>
-                                            <span className="text-gray-500 font-normal text-[9px] cursor-pointer hover:text-blue-500"
-                                              onClick={e => { e.stopPropagation(); copyText(s.maLop) }}
-                                              title="Click để copy mã lớp">{copied === s.maLop ? '✓' : s.maLop}</span>
+                                            <span className={`text-[9px] px-1 rounded font-medium ${s.classType === 'TN' ? 'bg-purple-100 text-purple-700' : s.classType === 'BT' ? 'bg-green-100 text-green-700' : s.classType === 'LT' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{s.classType}</span>
+                                            <span className="text-gray-500 flex items-center gap-0.5">
+                                              <span className="font-normal text-[10px]">{s.maLop}</span>
+                                              <span className="cursor-pointer hover:text-blue-500" onClick={e => { e.stopPropagation(); copyText(s.maLop) }} title="Copy">
+                                                {copied === s.maLop ? <CheckCircle2 className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
+                                              </span>
+                                            </span>
                                           </div>
                                        </div>
                                        <div className="flex justify-between items-end flex-1">
