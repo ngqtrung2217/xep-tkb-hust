@@ -612,7 +612,7 @@ export default function Home() {
               </button>
               <button onClick={shareTKB}
                 className="text-sm px-3 py-1.5 bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 flex items-center gap-1.5">
-                {shareLink ? <CheckCircle2 className="w-4 h-4" /> : <Share2 className="w-4 h-4" />} {shareLink ? 'Đã copy' : 'Share'}
+                {shareLink ? <CheckCircle2 className="w-4 h-4" /> : <Share2 className="w-4 h-4" />} {shareLink ? 'Đã copy' : `#${selectedResult + 1}`}
               </button>
             </div>}
           </div>
