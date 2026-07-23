@@ -892,12 +892,12 @@ export default function Home() {
             </div>
             <div className="space-y-3 text-sm text-gray-600 leading-relaxed">
               <div><strong className="text-gray-800">1. Upload file</strong><br />Tải file Excel TKB từ thông báo đăng ký tín chỉ HUST. Kéo thả hoặc click để chọn.</div>
-              <div><strong className="text-gray-800">2. Chọn môn</strong><br />Gõ mã HP để tìm, hoặc paste danh sách. Click môn để xem từng lớp. 👁 để ẩn, 📌 để ghim.</div>
-              <div><strong className="text-gray-800">3. Nghỉ buổi / Tránh giờ</strong><br />Bật nghỉ buổi (sáng/chiều). Trên heatmap click ô → ✕ tránh giờ đó. Scheduler sẽ bỏ qua.</div>
+              <div><strong className="text-gray-800">2. Chọn môn</strong><br />Gõ mã HP để tìm, hoặc paste danh sách. Click môn để xem từng lớp. (eye) để ẩn, (pin) để ghim.</div>
+              <div><strong className="text-gray-800">3. Nghỉ buổi / Tránh giờ</strong><br />Bật nghỉ buổi (sáng/chiều). Trên heatmap click ô - (x) tránh giờ đó. Scheduler sẽ bỏ qua.</div>
               <div><strong className="text-gray-800">4. Heatmap</strong><br />Mật độ lớp mở theo khung giờ. Hover xem chi tiết môn. Click pill để lọc theo môn.</div>
               <div><strong className="text-gray-800">5. Tuỳ chọn xếp</strong><br />Ít ngày, ít cửa sổ trống, xếp chung giờ nếu khác tuần.</div>
-              <div><strong className="text-gray-800">6. Ghim lớp 📌</strong><br />Ghim → khi xếp lại lớp đó giữ nguyên. Block lớp (click) → gạch ngang, ko xếp.</div>
-              <div><strong className="text-gray-800">7. Kết quả</strong><br />◀ ▶ duyệt cách xếp. Copy mã lớp bằng 📋. Share để gửi bạn bè.</div>
+              <div><strong className="text-gray-800">6. Ghim lớp (pin)</strong><br />Ghim - khi xếp lại lớp đó giữ nguyên. Block lớp (click) - gạch ngang, ko xếp.</div>
+              <div><strong className="text-gray-800">7. Kết quả</strong><br />Duyệt các cách xếp. Copy mã lớp. Share để gửi bạn bè.</div>
               <div><strong className="text-gray-800">8. Export ICS</strong><br />Xuất file .ics import vào Google Calendar.</div>
             </div>
           </div>
