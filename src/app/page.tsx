@@ -8,7 +8,7 @@ import * as XLSX from 'xlsx'
 import {
   Upload, Search, Plus, X, Calendar, SlidersHorizontal,
   ChevronLeft, ChevronRight, Save, Download, Sparkles, Flame,
-  CheckCircle2, Table2, ListOrdered, CircleHelp, Eye, EyeOff, ChevronDown, Loader2, Copy, Pin, PinOff
+  CheckCircle2, Table2, ListOrdered, CircleHelp, Eye, EyeOff, ChevronDown, Loader2, Copy, Pin, PinOff, Share2
 } from 'lucide-react'
 
 const DAY_OFF_LABELS: [string, boolean][] = [
@@ -77,21 +77,41 @@ export default function Home() {
   const shareTKB = () => {
     const result = scheduleResults?.[selectedResult]
     if (!result) return
-    const data = { c: selectedCodes, s: result.sessions.map(s => ({ m: s.maLop, c: s.courseCode })) }
-    const encoded = btoa(encodeURIComponent(JSON.stringify(data)))
+    const state = {
+      c: selectedCodes,
+      e: [...excludedSessions],
+      d: dayOff,
+      p: [...pinned],
+      f: programFilter,
+      md: minimizeDays,
+      mg: minimizeGaps,
+      w: weekAware,
+      b: [...brushSelect],
+      r: selectedResult,
+    }
+    const encoded = btoa(encodeURIComponent(JSON.stringify(state)))
     const link = window.location.origin + window.location.pathname + '?share=' + encoded
-    setShareLink(link)
     copyText(link)
+    setShareLink(link)
     setTimeout(() => setShareLink(''), 3000)
   }
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const shared = params.get('share')
-    if (shared && data) {
+    if (shared) {
       try {
-        const decoded = JSON.parse(decodeURIComponent(atob(shared)))
-        if (decoded.c) setSelectedCodes(prev => [...new Set([...prev, ...decoded.c])])
+        const state = JSON.parse(decodeURIComponent(atob(shared)))
+        if (state.c) setSelectedCodes(state.c)
+        if (state.e) setExcludedSessions(new Set(state.e))
+        if (state.d) setDayOff(state.d)
+        if (state.p) setPinned(new Set(state.p))
+        if (state.f) setProgramFilter(state.f)
+        if (state.md !== undefined) setMinimizeDays(state.md)
+        if (state.mg !== undefined) setMinimizeGaps(state.mg)
+        if (state.w !== undefined) setWeekAware(state.w)
+        if (state.b) setBrushSelect(new Set(state.b))
+        setTimeout(() => runScheduler(), 100)
       } catch {}
     }
   }, [data])
@@ -592,7 +612,7 @@ export default function Home() {
               </button>
               <button onClick={shareTKB}
                 className="text-sm px-3 py-1.5 bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 flex items-center gap-1.5">
-                <span className="text-xs font-bold">{shareLink ? '✓' : '🔗'}</span> Share
+                {shareLink ? <CheckCircle2 className="w-4 h-4" /> : <Share2 className="w-4 h-4" />} {shareLink ? 'Đã copy' : 'Share'}
               </button>
             </div>}
           </div>
