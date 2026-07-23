@@ -806,7 +806,15 @@ export default function Home() {
                     className="text-sm px-3 py-1.5 bg-gray-100 rounded-lg disabled:opacity-30 hover:bg-gray-200"><ChevronRight className="w-4 h-4" /></button>
                 </div>
               </div>
-              <div className="text-sm text-gray-500 mb-4">Còn <strong>{scheduleResults!.length - selectedResult - 1}</strong> cách xếp khác</div>
+              <div className="text-sm text-gray-500 mb-4 space-y-1">
+                <div className="flex items-center gap-4">
+                  <span className="font-medium text-gray-700">#{selectedResult + 1}</span>
+                  <span>📅 {currentResult.daysCount} ngày</span>
+                  <span>⏱ {currentResult.gaps} cửa sổ trống</span>
+                  {currentResult.score !== undefined && <span className="text-gray-400 text-xs">(score: {currentResult.score})</span>}
+                </div>
+                <div className="text-xs text-gray-400">Còn <strong>{scheduleResults!.length - selectedResult - 1}</strong> cách xếp khác</div>
+              </div>
               <div className="mb-4">
                 <h4 className="text-sm font-medium text-gray-600 mb-2">Chi tiết lớp đã xếp:</h4>
                 <div className="space-y-1.5">
