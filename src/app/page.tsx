@@ -732,39 +732,36 @@ export default function Home() {
                                     setTtHover({ sessions: starts, x: rect.left + rect.width / 2, y: rect.top - 8 })
                                   }
                                 }}
-                                onMouseLeave={() => setTtHover(null)}>
-                                <div className="flex gap-0.5" style={{ minHeight: 48 }}>
-                                 {starts.length > 0 ? starts.map((s: ClassSession) => {
+                                 onMouseLeave={() => setTtHover(null)}>
+                                 <div className="flex gap-0.5" style={{ minHeight: 48 }}>
+                                 {starts.map(s => {
                                    const color = courseColors.get(s.courseCode) || '#888'
                                    return (
-                                      <div key={s.maLop} className="flex-1 text-xs leading-snug rounded px-1 py-0.5 flex flex-col"
-                                        style={{ backgroundColor: color + '18', borderTop: `2px solid ${color}` }}>
-                                        <div className="font-semibold flex justify-between items-center" style={{ color }}>
-                                          <span className="text-sm">{s.courseCode}</span>
-                                          <div className="flex items-center gap-1">
-                                            <span className={`text-[10px] px-1 rounded font-medium ${s.classType === 'TN' ? 'bg-purple-100 text-purple-700' : s.classType === 'BT' ? 'bg-green-100 text-green-700' : s.classType === 'LT' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{s.classType}</span>
-                                            <span className="text-gray-500 flex items-center gap-0.5">
-                                              <span className="font-normal text-xs">{s.maLop}</span>
-                                              <span className="cursor-pointer hover:text-blue-500" onClick={e => { e.stopPropagation(); copyText(s.maLop) }} title="Copy">
-                                                {copied === s.maLop ? <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
-                                              </span>
-                                              <Pin onClick={e => { e.stopPropagation(); togglePin(s.maLop) }} className={`w-3.5 h-3.5 cursor-pointer ${pinned.has(s.maLop) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300 hover:text-gray-500'}`} />
-                                            </span>
-                                          </div>
-                                        </div>
-                                        <div className="flex justify-between items-end flex-1 mt-0.5">
-                                          <span className="text-gray-500 text-xs">{s.room || ''}</span>
-                                          <span className="text-gray-600 text-[10px]">{s.weeks}</span>
-                                        </div>
-                                      </div>
-                                   )
-                                 }) : unique.map((s: ClassSession) => {
-                                   const color = courseColors.get(s.courseCode) || '#888'
-                                   return (
-                                     <div key={s.maLop} className="flex-1 rounded"
-                                       style={{ backgroundColor: color + '10' }}>
+                                     <div key={s.maLop} className="flex-1 text-xs leading-snug rounded px-1 py-0.5 flex flex-col"
+                                       style={{ backgroundColor: color + '18', borderTop: `2px solid ${color}` }}>
+                                       <div className="font-semibold flex justify-between items-center" style={{ color }}>
+                                         <span className="text-sm">{s.courseCode}</span>
+                                         <div className="flex items-center gap-1">
+                                           <span className={`text-[10px] px-1 rounded font-medium ${s.classType === 'TN' ? 'bg-purple-100 text-purple-700' : s.classType === 'BT' ? 'bg-green-100 text-green-700' : s.classType === 'LT' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>{s.classType}</span>
+                                           <span className="text-gray-500 flex items-center gap-0.5">
+                                             <span className="font-normal text-xs">{s.maLop}</span>
+                                             <span className="cursor-pointer hover:text-blue-500" onClick={e => { e.stopPropagation(); copyText(s.maLop) }} title="Copy">
+                                               {copied === s.maLop ? <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+                                             </span>
+                                             <Pin onClick={e => { e.stopPropagation(); togglePin(s.maLop) }} className={`w-3.5 h-3.5 cursor-pointer ${pinned.has(s.maLop) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300 hover:text-gray-500'}`} />
+                                           </span>
+                                         </div>
+                                       </div>
+                                       <div className="flex justify-between items-end flex-1 mt-0.5">
+                                         <span className="text-gray-500 text-xs">{s.room || ''}</span>
+                                         <span className="text-gray-600 text-[10px]">{s.weeks}</span>
+                                       </div>
                                      </div>
                                    )
+                                 })}
+                                 {starts.length === 0 && unique.map(s => {
+                                   const color = courseColors.get(s.courseCode) || '#888'
+                                   return <div key={s.maLop} className="flex-1 rounded" style={{ backgroundColor: color + '10' }} />
                                  })}
                                 </div>
                                 {heatHover?.day === d && heatHover?.period === p && starts.length > 0 && (
@@ -806,15 +803,7 @@ export default function Home() {
                     className="text-sm px-3 py-1.5 bg-gray-100 rounded-lg disabled:opacity-30 hover:bg-gray-200"><ChevronRight className="w-4 h-4" /></button>
                 </div>
               </div>
-              <div className="text-sm text-gray-500 mb-4 space-y-1">
-                <div className="flex items-center gap-4">
-                  <span className="font-medium text-gray-700">#{selectedResult + 1}</span>
-                  <span>📅 {currentResult.daysCount} ngày</span>
-                  <span>⏱ {currentResult.gaps} cửa sổ trống</span>
-                </div>
-                <div className="text-xs text-gray-400">Còn <strong>{scheduleResults!.length - selectedResult - 1}</strong> cách xếp khác</div>
-              </div>
-              <div className="mb-4">
+              {scheduleResults && <div className="flex items-center gap-3">
                 <h4 className="text-sm font-medium text-gray-600 mb-2">Chi tiết lớp đã xếp:</h4>
                 <div className="space-y-1.5">
                   {[...currentResult.sessions]
@@ -836,7 +825,7 @@ export default function Home() {
                     )
                   })}
                 </div>
-              </div>
+              </div>}
             </div>}
 
 
