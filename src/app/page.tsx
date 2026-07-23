@@ -57,6 +57,7 @@ export default function Home() {
   const [weekAware, setWeekAware] = useState(() => { try { const v = localStorage.getItem('tkb_weekAware'); return v ? JSON.parse(v) : true } catch { return true } })
   const [tooltip, setTooltip] = useState<string | null>(null)
   const [heatHover, setHeatHover] = useState<{ day: number; period: number } | null>(null)
+  const [ttHover, setTtHover] = useState<{ sessions: ClassSession[]; x: number; y: number } | null>(null)
   const [hiddenCourses, setHiddenCourses] = useState<Set<string>>(new Set())
   const [showDayOff, setShowDayOff] = useState(true)
   const [showOptions, setShowOptions] = useState(true)
@@ -657,8 +658,13 @@ export default function Home() {
                            const unique = sessions.filter((s: ClassSession, i: number, arr: ClassSession[]) => i === arr.findIndex(x => x.maLop === s.maLop))
                             return (
                               <td key={d} className="border p-0.5 align-top relative" style={{ minHeight: 52 }}
-                                onMouseEnter={() => setHeatHover({ day: d, period: p })}
-                                onMouseLeave={() => setHeatHover(null)}>
+                                onMouseEnter={e => {
+                                  if (starts.length > 0) {
+                                    const rect = (e.target as HTMLElement).getBoundingClientRect()
+                                    setTtHover({ sessions: starts, x: rect.left + rect.width / 2, y: rect.top - 8 })
+                                  }
+                                }}
+                                onMouseLeave={() => setTtHover(null)}>
                                 <div className="flex gap-0.5" style={{ minHeight: 48 }}>
                                  {starts.length > 0 ? starts.map((s: ClassSession) => {
                                    const color = courseColors.get(s.courseCode) || '#888'
@@ -753,6 +759,25 @@ export default function Home() {
         </main>
       </div>
       </div>
+      {ttHover && (
+        <div className="fixed z-[9999] pointer-events-none" style={{ left: ttHover.x, top: ttHover.y, transform: 'translate(-50%, -100%)' }}>
+          <div className="bg-gray-900 text-white text-xs rounded-xl shadow-2xl px-3 py-2 space-y-1">
+            {ttHover.sessions.map(s => {
+              const c = courseColors.get(s.courseCode) || '#888'
+              return (
+                <div key={s.maLop} className="flex items-center gap-2 whitespace-nowrap">
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: c }} />
+                  <span className="font-semibold">{s.courseCode}</span>
+                  <span className="text-gray-300">{s.maLop}</span>
+                  <span className="text-gray-400">{s.classType}</span>
+                  <span className="text-gray-400">{s.room}</span>
+                  <span className="text-gray-500">tuần {s.weeks}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </>
   )
 }
