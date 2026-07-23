@@ -151,7 +151,8 @@ export default function Home() {
     if (!data || selectedCodes.length === 0) return
     const activeCodes = selectedCodes.filter(code => !hiddenCourses.has(code))
     if (activeCodes.length === 0) return
-    const sessionsPerCourse = activeCodes.map(code => {
+    const sessionsPerCourse: ClassSession[][][] = []
+    for (const code of activeCodes) {
       const all = data.sessions.filter(s => s.courseCode === code).filter(s => programFilter === 'all' || s.programType === programFilter)
       const ltPlusBt: ClassSession[][] = []
 
@@ -177,12 +178,8 @@ export default function Home() {
       for (const [ltKey, ltSessions] of ltByMaLop) {
         const matchedBt = [...btByMaLop].filter(([_, sessions]) => sessions[0].maLopKem === ltKey)
         if (matchedBt.length > 0) {
-          for (const [_, btSessions] of matchedBt) {
-            ltPlusBt.push([...ltSessions, ...btSessions])
-          }
-        } else {
-          ltPlusBt.push(ltSessions)
-        }
+          for (const [_, btSessions] of matchedBt) ltPlusBt.push([...ltSessions, ...btSessions])
+        } else ltPlusBt.push(ltSessions)
       }
       for (const [_, btSessions] of btByMaLop) {
         const ltKey = btSessions[0].maLopKem
@@ -207,8 +204,11 @@ export default function Home() {
         otherByMaLop.get(s.maLop)!.push(s)
       }
 
-      return [...ltPlusBt, ...btByMaLop.values(), ...ltbtByMaLop.values(), ...tnByMaLop.values(), ...otherByMaLop.values()]
-    })
+      const main = [...ltPlusBt, ...ltbtByMaLop.values(), ...otherByMaLop.values()]
+      if (main.length > 0) sessionsPerCourse.push(main)
+      const tnList = [...tnByMaLop.values()]
+      if (tnList.length > 0) sessionsPerCourse.push(tnList)
+    }
     if (sessionsPerCourse.some(s => s.length === 0)) return
     const prefs: UserPreferences = { dayOff, minimizeDays, minimizeGaps, preferredSlots: [...brushSelect], weekAware }
     const results = findAllSchedules(sessionsPerCourse, prefs, excludedSessions)
