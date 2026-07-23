@@ -76,6 +76,7 @@ export function findAllSchedules(
       for (const session of group) {
         for (let p = session.startPeriod; p <= session.endPeriod; p++) {
           if (isDayBlocked(session.day, p, prefs.dayOff)) { blocked = true; break }
+          if (prefs.avoidedSlots?.includes(`${session.day}-${p}`)) { blocked = true; break }
         }
         if (blocked) break
         for (const existing of current) {

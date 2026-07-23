@@ -49,6 +49,7 @@ export default function Home() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const [brushSelect, setBrushSelect] = useState<Set<string>>(new Set())
+  const [avoidedSlots, setAvoidedSlots] = useState<Set<string>>(new Set())
   const [saving, setSaving] = useState<string | null>(null)
   const [parseError, setParseError] = useState<string | null>(null)
   const [dayOff, setDayOff] = useState<boolean[]>(() => loadJSON('tkb_dayoff', Array(14).fill(false)))
@@ -282,12 +283,25 @@ export default function Home() {
       const tnList = [...tnByMaLop.values()]
       if (tnList.length > 0) sessionsPerCourse.push(tnList)
     }
-    if (sessionsPerCourse.some(s => s.length === 0)) return
+    if (sessionsPerCourse.some(s => s.length === 0)) {
+      const emptyCourses = activeCodes.filter((code, i) => {
+        const total = sessionsPerCourse.filter((_, j) => {
+          const courseEntry = sessionsPerCourse[j]
+          return j >= (sessionsPerCourse as any)._offset && courseEntry.some(g => g[0]?.courseCode === code)
+        }).length
+        return total === 0
+      })
+      if (emptyCourses.length > 0) {
+        setToast({ msg: `Không còn lớp nào cho: ${emptyCourses.join(', ')}`, suggestion: 'Bỏ nghỉ buổi hoặc bỏ tránh giờ để có thêm lựa chọn.' })
+        setTimeout(() => setToast(null), 6000)
+      }
+      setScheduling(false); return
+    }
       const filtered = sessionsPerCourse.map(options => {
         const pinKey = options.find(g => pinned.has(g[0].maLop))
         return pinKey ? [pinKey] : options
       })
-      const prefs: UserPreferences = { dayOff, minimizeDays, minimizeGaps, preferredSlots: [...brushSelect], weekAware }
+      const prefs: UserPreferences = { dayOff, minimizeDays, minimizeGaps, preferredSlots: [...brushSelect], weekAware, avoidedSlots: [...avoidedSlots] }
       const results = findAllSchedules(filtered, prefs, excludedSessions, setSchedProgress)
       if (results.length === 0) {
         const blockedDays = DAY_OFF_LABELS.filter((_, i) => dayOff[i]).map(([l]) => l)
@@ -666,9 +680,10 @@ export default function Home() {
                             <td key={d}
                               onMouseEnter={e => { const r = (e.target as HTMLElement).getBoundingClientRect(); setHeatHover({ day: d, period: p, x: r.left + r.width / 2, y: r.top }) }}
                               onMouseLeave={() => setHeatHover(null)}
-                              className="border text-sm text-center p-1 cursor-default"
-                              style={{ backgroundColor: getHeatColor(val, maxHeat) }}>
-                              {val > 0 && <span className="font-medium">{val}</span>}
+                              onClick={() => { const key = `${d}-${p}`; setAvoidedSlots(prev => { const n = new Set(prev); if (n.has(key)) n.delete(key); else n.add(key); return n }) }}
+                              className="border text-sm text-center p-1 cursor-pointer relative"
+                              style={{ backgroundColor: avoidedSlots.has(`${d}-${p}`) ? '#fecaca' : dayOff[d * 2 + (p >= 7 ? 1 : 0)] ? '#f3f4f6' : getHeatColor(val, maxHeat) }}>
+                              {avoidedSlots.has(`${d}-${p}`) ? <span className="text-red-500 font-bold">✕</span> : dayOff[d * 2 + (p >= 7 ? 1 : 0)] ? null : val > 0 ? <span className="font-medium">{val}</span> : null}
                               {isHover && unique.length > 0 && <div className="fixed z-[9999] px-4 py-3 bg-gray-900 text-white text-sm rounded-xl shadow-2xl pointer-events-none max-w-md"
                                 style={{ left: heatHover.x, top: heatHover.y, transform: 'translate(-50%, -105%)' }}>
                                 <div className="font-semibold text-sm mb-1">{DAY_LABELS[d]} - Tiết {p} ({PERIOD_TIME[p]})</div>
